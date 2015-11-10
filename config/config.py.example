@@ -1,0 +1,9 @@
+class CONFIG:
+    DEBUG = True
+
+    class MONGO:
+        HOST = ""
+        DATABASE = ""
+        PORT =
+        USERNAME = ""
+        PASSWORD = ""

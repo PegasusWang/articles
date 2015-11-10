@@ -6,3 +6,5 @@ simplejson
 requests
 jieba
 beautifulsoup4
+html2text
+motor
