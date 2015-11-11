@@ -112,7 +112,7 @@ class MySpider(AsySpider):
 
 def main():
     urls = []
-    for page in range(10000, 70000):
+    for page in range(1, 70000):
         urls.append('http://www.jb51.net/article/%s.htm' % page)
     s = MySpider(urls)
     s.run()
