@@ -8,3 +8,5 @@ jieba
 beautifulsoup4
 html2text
 motor
+markdown2
+Pygments
