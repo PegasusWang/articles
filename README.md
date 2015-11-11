@@ -1,1 +1,3 @@
-继续用tornado练手的小项目，爬虫采集技术文章，前端更好展现。
+继续用tornado练手的小项目，技术博客。
+clone代码.
+安装依赖: pip install -r requirements.txt
