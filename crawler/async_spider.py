@@ -5,6 +5,7 @@ import time
 from datetime import timedelta
 from tornado import httpclient, gen, ioloop, queues
 import traceback
+from extract import extract
 
 
 class AsySpider(object):
@@ -19,14 +20,14 @@ class AsySpider(object):
 
     def fetch(self, url, **kwargs):
         fetch = getattr(httpclient.AsyncHTTPClient(), 'fetch')
-        return fetch(url, **kwargs)
+        return fetch(url, raise_error=False, **kwargs)
 
     def handle_html(self, url, html):
         """handle html page"""
         print(url)
 
     def handle_response(self, url, response):
-        """inherit and rewrite this method"""
+        """inherit and rewrite this method if necessary"""
         if response.code == 200:
             self.handle_html(url, response.body)
 
@@ -80,7 +81,11 @@ class AsySpider(object):
             worker()
 
         yield self._q.join(timeout=timedelta(seconds=300000))
-        assert self._fetching == self._fetched
+        try:
+            assert self._fetching == self._fetched
+        except AssertionError:
+            print(self._fetching-self._fetched)
+            print(self._fetched-self._fetching)
 
     def run(self):
         io_loop = ioloop.IOLoop.current()
@@ -97,20 +102,22 @@ class MySpider(AsySpider):
             'cookie': cookies_str
         }
         return super(MySpider, self).fetch(
-            url, headers=headers, request_timeout=1
+            url, headers=headers
         )
 
     def handle_html(self, url, html):
-        print(url, html)
+        title = extract('<title>', '</title>', html)
+        print url, title.decode('gb18030').encode('utf-8')
 
 
 def main():
     urls = []
-    for page in range(1, 10):
-        urls.append('http://jinritu.com?page=%s' % page)
+    for page in range(10000, 70000):
+        urls.append('http://www.jb51.net/article/%s.htm' % page)
     s = MySpider(urls)
     s.run()
 
 
 if __name__ == '__main__':
     main()
+
