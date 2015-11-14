@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import _env
+import os
 import urlparse
+import traceback
 import requests
 from async_spider import AsySpider
 from extract import extract, extract_all
@@ -31,8 +33,11 @@ class TagSpider(AsySpider):
         # 变成http://www.runoob.com/path/html-tutorial
         urls = [urlparse.urljoin(base_url, url)
                 for url in urls if base_url not in url]
-        for i in urls:
-            print(i)
+
+        # 保存所有url供SubtagSpider读取
+        with open('urls.txt', 'a+') as f:
+            for i in urls:
+                f.write(i+'\n')
 
 
 class SubtagSpider(AsySpider):
@@ -45,9 +50,17 @@ class SubtagSpider(AsySpider):
         # 用url的有意义的一部分命名文件
         # http://www.runoob.com/html/html-tutorial.html得到的
         # filename为html_html-tutorial.html
-        filename = path.strip('/').replace('/', '_')
-        with open(filename, 'wb') as f:
-            f.write(html)
+        # 注意这个保存到当前文件夹，别把html加入版本库，移出去保存
+
+        try:
+            filename = './runoob_html/' + path.strip('/').replace('/', '_')
+            with open(filename, 'wb') as f:
+                f.write(html)
+            print('saving file...^_^', filename)
+
+        except IOError:    # 当前文件没有runoob_html文件夹
+            if not os.path.exists('./runoob_html'):
+                os.makedirs('./runoob_html')
 
 
 def test_get_sub_urls():
@@ -69,14 +82,25 @@ def test_sub_spider():
 
 
 def main():
+    # 三步走
     url = 'http://www.runoob.com'
-    tag_urls = get_sub_urls(url)
+    tag_urls = get_sub_urls(url)    # 所有分类
+
+    # 所有分类页面的主页面左边一列有这个分类下的所有url，下边输出到urls.txt里边
+    # 可以参考TagSpider的handle_html
     tag_spider = TagSpider(tag_urls)
     tag_spider.run()
 
+    # 读取上边保存的urls.txt
+    with open('urls.txt', 'r') as f:
+        urls = [i.strip() for i in f.readlines() if i]
+    urls = list(set(urls))    # remove duplicate
+    s = SubtagSpider(urls)
+    s.run()
+
 
 if __name__ == '__main__':
-    test_get_sub_urls()
+    #test_get_sub_urls()
     #test_tag_spider()
     #test_sub_spider()
-    #main()
+    main()
