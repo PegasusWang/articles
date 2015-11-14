@@ -25,7 +25,8 @@ def extract(begin, end, html):
 
 
 def extract_all(begin, end, html):
-    return map(str.strip, _extract_all(begin, end, html))
+    typeof = type(html)
+    return map(getattr(typeof, 'strip'), _extract_all(begin, end, html))
 
 
 def _extract_all(begin, end, html):

@@ -39,7 +39,7 @@ class AsySpider(object):
     def get_page(self, url):
         try:
             response = yield self.fetch(url)
-            print('######fetched %s' % url)
+            #print('######fetched %s' % url)
         except Exception as e:
             print('Exception: %s %s' % (e, url))
             raise gen.Return(e)
@@ -54,7 +54,7 @@ class AsySpider(object):
                 if current_url in self._fetching:
                     return
 
-                print('fetching****** %s' % current_url)
+                #print('fetching****** %s' % current_url)
                 self._fetching.add(current_url)
 
                 response = yield self.get_page(current_url)
@@ -120,4 +120,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
