@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import _env
 import urlparse
 import requests
 from async_spider import AsySpider
