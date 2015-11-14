@@ -4,11 +4,14 @@
 import json
 import io
 import os
+import re
+import pymongo
 from pprint import pprint
 from html2text import html2text
 from extract import extract as et
 from extract import extract_all as et_all
 from markdown2 import markdown, markdown_path
+from config.config import CONFIG
 
 
 def get_all_files(path):
@@ -21,8 +24,8 @@ def get_all_files(path):
 
 
 def remove_words(s):
-    for key in ['<!--NEWSZW_HZH_END-->', '<!--NEWSZW_HZH_BEGIN-->',
-                'http://www.jb51.net', 'www.jb51.net', 'jb51.net']:
+    for key in ['<!--NEWSZW_HZH_END-->', '<!--NEWSZW_HZH_BEGIN-->']:
+                #'http://www.jb51.net', 'www.jb51.net', 'jb51.net']:
         s = s.replace(key, '')
     return s
 
@@ -84,8 +87,11 @@ def all_to_txt(input_path, output_path):
         with open(each, 'r') as f:
             html = f.read()
             data = parse_jb51(html)
-            filename = os.path.join(output_path,
-                           os.path.basename(each).rsplit('.', 1)[0] + '.txt')
+
+            file_id = os.path.basename(each).rsplit('.', 1)[0]
+            data['source'] = 'http://www.jb51.net/article/%s.htm' % file_id
+            data['source_id'] = file_id
+            filename = os.path.join(output_path, file_id + '.txt')
             print(filename)
 
             if data.get('brief'):
@@ -128,5 +134,5 @@ def test():
 
 if __name__ == '__main__':
     #test()
-    #all_to_txt('/home/wnn/raw/jb51_html', '/home/wnn/raw/jb51_txt')
+    all_to_txt('/home/wnn/raw/jb51_html', '/home/wnn/raw/jb51_txt')
     all_to_html('/home/wnn/raw/jb51_txt', '/home/wnn/raw/jb51_txt')

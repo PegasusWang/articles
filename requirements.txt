@@ -10,3 +10,4 @@ html2text
 motor
 markdown2
 Pygments
+pymongo
