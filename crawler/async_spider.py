@@ -10,13 +10,15 @@ from extract import extract
 
 class AsySpider(object):
     """A simple class of asynchronous spider."""
-    def __init__(self, urls, concurrency=10, **kwargs):
+    def __init__(self, urls, concurrency=10, results=None, **kwargs):
         urls.reverse()
         self.urls = urls
         self.concurrency = concurrency
         self._q = queues.Queue()
         self._fetching = set()
         self._fetched = set()
+        if results is None:
+            self.results = []
 
     def fetch(self, url, **kwargs):
         fetch = getattr(httpclient.AsyncHTTPClient(), 'fetch')

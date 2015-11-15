@@ -22,10 +22,6 @@ def get_sub_urls(url):
 
 
 class TagSpider(AsySpider):
-    def __init__(self, urls, concurrency=10, **kwargs):
-        super(TagSpider, self).__init__(urls, concurrency, **kwargs)
-        self.results = []
-
     """进入分类后左边有一列是这个分类的所有文章，这个handle_html就是拿到所有
     这些文章的url, 你可以先输出到一个文件，供SubtagSpider读取。
     """
