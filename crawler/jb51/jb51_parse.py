@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import _env
 import json
 import io
 import os
 import re
-import pymongo
+from lib._db import get_collection
 from pprint import pprint
 from html2text import html2text
 from extract import extract as et
 from extract import extract_all as et_all
 from markdown2 import markdown, markdown_path
-from config.config import CONFIG
 
 
 def get_all_files(path):
@@ -117,6 +117,38 @@ def all_to_html(input_path, output_path):
                     f.write(markdown2html(md))
 
 
+def save_to_mongo(db_name, col_name, doc_path):
+    articles = get_collection(db_name, col_name)  # collection articles
+
+    max_cnt = 100
+    index = 0
+
+    for path in get_all_files(doc_path):
+        print(path)
+        index += 1
+        if index > max_cnt:
+            return
+
+        with open(path, 'r') as f:
+            html = f.read()
+            data = parse_jb51(html)
+
+            file_id = os.path.basename(path).rsplit('.', 1)[0]
+            data['source'] = 'http://www.jb51.net/article/%s.htm' % file_id
+            data['source_id'] = file_id
+
+            print(data.get('source_id'))
+            print(data.get('title'))
+
+            articles.update(
+                {'source_id': data.get('source_id')},
+                {
+                    '$set': data
+                },
+                True
+            )
+
+
 def test():
     content = open('72000.html', 'r').read()
     d = parse_jb51(content)
@@ -134,5 +166,6 @@ def test():
 
 if __name__ == '__main__':
     #test()
-    all_to_txt('/home/wnn/raw/jb51_html', '/home/wnn/raw/jb51_txt')
-    all_to_html('/home/wnn/raw/jb51_txt', '/home/wnn/raw/jb51_txt')
+    #all_to_txt('/home/wnn/raw/jb51_html', '/home/wnn/raw/jb51_txt')
+    #all_to_html('/home/wnn/raw/jb51_txt', '/home/wnn/raw/jb51_txt')
+    save_to_mongo('test', 'Articles', '/home/wnn/raw/jb51_html')

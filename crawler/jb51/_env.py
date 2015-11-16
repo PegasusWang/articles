@@ -14,5 +14,12 @@ PREFIX = abspath(
     )
 )
 
+PARENT = abspath(
+    join(
+        dirname(abspath(__file__)), '../../'
+    )
+)
+
 if PREFIX not in sys.path:
     sys.path.append(PREFIX)
+    sys.path.append(PARENT)
