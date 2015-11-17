@@ -2,17 +2,15 @@
 # -*- coding:utf-8 -*-
 
 from handlers import (
-    base, admin,
+    base, articles,
 )
 from tornado.web import url
+from lib._db import get_collection
 
 
 url_patterns = [
-    # leancloud api
-    url(r'/api/data.json', leancloud_handler.LeanClassHandler),
-
-    url(r'/?', site.SiteHandler, dict(class_name='Girls')),
-    url(r'/show/([\w_]+)/?', show.ShowHandler),
+    url(r'/post/(\w+)/?', articles.ArticlesHandler,
+        dict(coll=get_collection('test', 'Articles', 'motor'))),
 
     url(r'.*', base.PageNotFoundHandler),    # catch return 404 page
 ]

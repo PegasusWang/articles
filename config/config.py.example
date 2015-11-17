@@ -10,4 +10,4 @@ class CONFIG:
 
     class REDIS:
         HOST = ""
-        PORT = ""
+        PORT = 1234

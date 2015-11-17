@@ -6,10 +6,15 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 import tornado.gen
-from tornado.options import options
-
-from settings import settings
+from tornado.options import options, define
 from urls import url_patterns
+
+define("port", default=8888, help="run on the given port", type=int)
+
+
+settings = dict(
+    debug=True,
+)
 
 
 class ArticlesApp(tornado.web.Application):
@@ -20,6 +25,7 @@ class ArticlesApp(tornado.web.Application):
 
 
 def main():
+    tornado.options.parse_command_line()
     app = ArticlesApp()
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(options.port)

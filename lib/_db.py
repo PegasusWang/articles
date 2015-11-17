@@ -13,6 +13,13 @@ motor_client = MotorClient(CONFIG.MONGO.HOST, CONFIG.MONGO.PORT)
 redis_client = StrictRedis(CONFIG.REDIS.HOST, CONFIG.REDIS.PORT)
 
 
-def get_collection(db_name, collection_name, client=mongo_client):
+client_db_map = {
+    'mongo': mongo_client,
+    'motor': motor_client
+}
+
+
+def get_collection(db_name, collection_name, client='mongo'):
+    client = client_db_map.get(client)
     db = getattr(client, db_name, None)
     return getattr(db, collection_name, None)

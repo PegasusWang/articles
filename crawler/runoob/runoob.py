@@ -9,6 +9,9 @@ import requests
 from async_spider import AsySpider
 from extract import extract, extract_all
 
+"""改进下爬虫，之前的是把中间拿到的url写入文本里边，
+可以给类加上results，这样就可以直接拿到结果。
+"""
 
 def get_sub_urls(url):
     """从主页拿到所有的子分类"""
@@ -34,10 +37,7 @@ class TagSpider(AsySpider):
         urls = [urlparse.urljoin(base_url, url)
                 for url in urls if base_url not in url]
 
-        # 保存所有url供SubtagSpider读取
-        with open('urls.txt', 'a+') as f:
-            for i in urls:
-                f.write(i+'\n')
+        self.results.extend(urls)    # 保存结果，url的列表
 
 
 class SubtagSpider(AsySpider):
@@ -86,17 +86,17 @@ def main():
     url = 'http://www.runoob.com'
     tag_urls = get_sub_urls(url)    # 所有分类
 
-    # 所有分类页面的主页面左边一列有这个分类下的所有url，下边输出到urls.txt里边
+    # 拿到每个分类左边的列表
     # 可以参考TagSpider的handle_html
     tag_spider = TagSpider(tag_urls)
     tag_spider.run()
+    urls = tag_spider.results
 
-    # 读取上边保存的urls.txt
-    with open('urls.txt', 'r') as f:
-        urls = [i.strip() for i in f.readlines() if i]
     urls = list(set(urls))    # remove duplicate
     s = SubtagSpider(urls)
     s.run()
+
+    print('over')
 
 
 if __name__ == '__main__':
