@@ -7,3 +7,7 @@ class CONFIG:
         PORT =
         USERNAME = ""
         PASSWORD = ""
+
+    class REDIS:
+        HOST = ""
+        PORT = ""

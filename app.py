@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from config import redis_config
-from redis import StrictRedis
+from lib import _db
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
@@ -16,7 +15,8 @@ from urls import url_patterns
 class ArticlesApp(tornado.web.Application):
     def __init__(self):
         tornado.web.Application.__init__(self, url_patterns, **settings)
-        self._redis = StrictRedis(redis_config.HOST, redis_config.PORT)
+        self._redis = _db.redis_client
+        self._motor = _db.motor_client
 
 
 def main():
