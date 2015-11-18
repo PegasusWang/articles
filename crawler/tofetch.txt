@@ -1,4 +1,4 @@
-jb51    # pass
+jb51    # pass已爬
 伯乐在线
 http://www.bkjia.com/Linux/935878.html
 http://www.linuxdiyf.com/linux/14715.html
@@ -8,7 +8,7 @@ http://www.zgxue.com/itbc/article/63661.htm
 http://www.tutorialspoint.com/index.htm
 http://www.bogotobogo.com/python/python_generators.php
 http://www.webtag123.com/javascript/22907.html
-http://www.runoob.com/
+http://www.runoob.com/    # pass
 http://www.ziqiangxuetang.com/python/att-dictionary-setdefault.html
 http://www.yiibai.com/python/dictionary_setdefault.html
 http://www.chinaunix.net/
@@ -21,4 +21,6 @@ https://pythonadventures.wordpress.com/2013/08/13/concurrent-futures/
 http://segmentfault.com/a/1190000001813992
 #segmentfault文章质量比较高，并且是大陆共享3.0协议，可以任意转载保留原文。
 
-http://www.lxway.com/168696.html    # 这个比较好爬，递增id的url
+http://www.lxway.com/168696.html  # 这个比较好爬，递增id的url,注意递增忽略404
+
+http://simple-is-better.com/news/  # 这个是专做python文章和招聘的，python较多
