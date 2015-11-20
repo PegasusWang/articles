@@ -2,7 +2,10 @@
 # -*- coding:utf-8 -*-
 
 from handlers import (
-    base, articles,
+    base,
+)
+from rest import (
+    articles,
 )
 from tornado.web import url
 from lib._db import get_collection
