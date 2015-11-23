@@ -9,7 +9,7 @@ from tornado import gen
 from tornado.web import RequestHandler, HTTPError, addslash
 
 
-class ArticlesHandler(RequestHandler):
+class ArticlesHandler(JsonpHandler):
     def initialize(self, coll):
         self.coll = coll
 
@@ -20,26 +20,11 @@ class ArticlesHandler(RequestHandler):
         article = yield self.coll.find_one(
             {'_id': ObjectId(post_id)}
         )
-        print(type(article))
+
+        call = 'write_jsonp' if self.get_argument('callback', None) else 'write'
+        method = getattr(self, call)
+
         if article:
-            self.write(dumps(article))    # or del article["_id"]
+            method(dumps(article))    # or del article["_id"]
         else:
-            self.write({})
-
-
-class JsonpArticlesHandler(JsonpHandler):
-    def initialize(self, coll):
-        self.coll = coll
-
-    @addslash
-    @gen.coroutine
-    def get(self, post_id):
-        print(post_id, type(post_id))
-        article = yield self.coll.find_one(
-            {'_id': ObjectId(post_id)}
-        )
-        print(type(article))
-        if article:
-            self.write_jsonp(dumps(article))    # or del article["_id"]
-        else:
-            self.write_jsonp({})
+            method({})
