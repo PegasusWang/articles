@@ -1,5 +1,7 @@
 jb51    # pass已爬
 伯乐在线
+http://python.jobbole.com/81153/    #
+伯乐的文章做的相当不错了，很多也可以转载用，不过只有技术相关的。
 http://www.bkjia.com/Linux/935878.html
 http://www.linuxdiyf.com/linux/14715.html
 http://www.linuxidc.com/Linux/2010-05/26394.htm
@@ -24,3 +26,7 @@ http://www.lxway.com/168696.html  # 这个比较好爬，递增id的url,注意�
 
 http://simple-is-better.com/news/  # 这个是专做python文章和招聘的，python较多
 http://blog.fens.me/nodejs-restify/  # 不少高质量的nodejs，R，hadoop文章,允许转载
+
+http://www.jeepshoe.org/914692121.htm    # 简单的递增id，跳过404
+http://dataunion.org/11601.html    #大数据相关
+http://www.sharejs.com/codes/python/9009    #脚本分享网
