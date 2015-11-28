@@ -2,6 +2,8 @@
 # -*- coding:utf-8 -*-
 
 from lib import _db
+from lib._db import get_db
+from config.config import CONFIG
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
@@ -21,7 +23,7 @@ class ArticlesApp(tornado.web.Application):
     def __init__(self):
         tornado.web.Application.__init__(self, url_patterns, **settings)
         self._redis = _db.redis_client
-        self._motor = _db.motor_client
+        self._motor = get_db(CONFIG.MONGO.DATABASE, client='motor')
 
 
 def main():

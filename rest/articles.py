@@ -6,12 +6,12 @@ from bson.objectid import ObjectId
 from bson.json_util import dumps
 from jsonp import JsonpHandler
 from tornado import gen
-from tornado.web import RequestHandler, HTTPError, addslash
+from tornado.web import addslash, url
 
 
 class ArticlesHandler(JsonpHandler):
     def initialize(self, coll):
-        self.coll = coll
+        self.coll = getattr(self.application._motor, coll)
 
     @addslash
     @gen.coroutine
@@ -33,3 +33,8 @@ class ArticlesHandler(JsonpHandler):
             article = {}
 
         self.write_json(dumps(article))   # or del article["_id"]
+
+
+articles_url = [
+    url(r'/post/(\w+)/?', ArticlesHandler, dict(coll='Articles'))
+]

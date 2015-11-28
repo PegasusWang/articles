@@ -23,3 +23,8 @@ def get_collection(db_name, collection_name, client='mongo'):
     client = client_db_map.get(client)
     db = getattr(client, db_name, None)
     return getattr(db, collection_name, None)
+
+
+def get_db(db_name, client='mongo'):
+    client = client_db_map.get(client)
+    return getattr(client, db_name, None)

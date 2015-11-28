@@ -8,12 +8,7 @@ from rest import (
     articles,
 )
 from tornado.web import url
-from lib._db import get_collection
 
-
-url_patterns = [
-    url(r'/post/(\w+)/?', articles.ArticlesHandler,
-        dict(coll=get_collection('test', 'Articles', 'motor'))),
-
-    url(r'.*', base.PageNotFoundHandler),    # catch return 404 page
-]
+url_patterns = []
+url_patterns.extend(articles.articles_url)
+url_patterns.append(url(r'.*', base.PageNotFoundHandler))    # catch return 404

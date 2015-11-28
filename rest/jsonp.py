@@ -9,7 +9,8 @@ class JsonpHandler(RequestHandler):
 
     def write_json(self, data_dict):
         """根据是否含有callback请求参数自动返回json或者jsonp调用"""
-        callback = self.get_arguments('callback', None)
+        callback = self.get_argument('callback', None)
+        print(callback)
         if callback is not None:
             jsonp = "{jsfunc}({json});".format(jsfunc=callback,
                                                json=json_encode(data_dict))
