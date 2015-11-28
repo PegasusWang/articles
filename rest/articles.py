@@ -16,11 +16,10 @@ class ArticlesHandler(JsonpHandler):
     @addslash
     @gen.coroutine
     def get(self, post_id):
-        print(post_id, type(post_id))
-        article = yield self.coll.find_one(
-            {'_id': ObjectId(post_id)}
-        )
         try:
+            article = yield self.coll.find_one(
+                {'_id': ObjectId(post_id)}
+            )
             self.write_json(dumps(article))   # or del article["_id"]
         except:
             self.write_json(dumps({}))
