@@ -20,6 +20,6 @@ class ArticlesHandler(JsonpHandler):
             article = yield self.coll.find_one(
                 {'_id': ObjectId(post_id)}
             )
-            self.write_json(dumps(article))   # or del article["_id"]
         except:
-            self.write_json(dumps({}))
+            article = article or {}
+        self.write_json(dumps(article))   # or del article["_id"]
