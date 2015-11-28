@@ -20,11 +20,7 @@ class ArticlesHandler(JsonpHandler):
         article = yield self.coll.find_one(
             {'_id': ObjectId(post_id)}
         )
-
-        call = 'write_jsonp' if self.get_argument('callback', None) else 'write'
-        method = getattr(self, call)
-
-        if article:
-            method(dumps(article))    # or del article["_id"]
-        else:
-            method({})
+        try:
+            self.write_json(dumps(article))   # or del article["_id"]
+        except:
+            self.write_json(dumps({}))
