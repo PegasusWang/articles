@@ -30,6 +30,10 @@ def remove_words(s):
     return s
 
 
+def parse_jb51_new(html):
+    """新的文章改了html标签，重新抠"""
+    pass
+
 def parse_jb51(html):
     html = unicode(html)
     html = html.replace(r'\r', '')

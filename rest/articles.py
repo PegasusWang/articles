@@ -9,11 +9,13 @@ from tornado import gen
 from tornado.web import addslash, url
 
 
-class ArticlesHandler(JsonpHandler):
+class BaseHandler(JsonpHandler):
     def initialize(self, coll):
         self.coll = getattr(self.application._motor, coll)
 
-    @addslash
+
+class Post(BaseHandler):
+    """通过id返回文章json数据"""
     @gen.coroutine
     def get(self, post_id):
         try:
@@ -35,6 +37,11 @@ class ArticlesHandler(JsonpHandler):
         self.write_json(dumps(article))   # or del article["_id"]
 
 
+class UpdatePost(JsonpHandler):
+    """更新文章信息"""
+    pass
+
+
 articles_url = [
-    url(r'/post/(\w+)/?', ArticlesHandler, dict(coll='Articles'))
+    url(r'/post/(\w+)/?', Post, dict(coll='Articles'))
 ]
