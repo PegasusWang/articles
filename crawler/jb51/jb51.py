@@ -24,17 +24,18 @@ class Jb51Spider(AsySpider):
             True
         )
 
+    @gen.coroutine
     def handle_html(self, url, html):
         html = extract('<div class="dxy_main">', '<div class="art_bot_ad">', html)
         html = html.decode('gb18030')
         data = parse_jb51(html)
         data['source_url'] = url
-        self.update(url, data)
+        yield self.update(url, data)
 
 
 if __name__ == '__main__':
     urls = []
-    for page in range(10, 20):
+    for page in range(10, 2000):
         urls.append('http://www.jb51.net/article/%s.htm' % page)
     s = Jb51Spider(urls)
     s.run()
