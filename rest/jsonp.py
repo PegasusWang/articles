@@ -13,7 +13,7 @@ class JsonpHandler(RequestHandler):
         if callback is not None:    # jsonp
             jsonp = "{jsfunc}({json});".format(jsfunc=callback,
                                                json=json_encode(data_dict))
-            self.write(jsonp)    # call set header after call write
+            self.write(jsonp)    # call_set header after call write
             self.set_header("Content-Type", "application/javascript; charset=UTF-8")
         else:   # json
             self.write(data_dict)

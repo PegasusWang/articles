@@ -6,6 +6,7 @@ import json
 import io
 import os
 import re
+import requests
 from lib._db import get_collection
 from pprint import pprint
 from html2text import html2text
@@ -35,21 +36,18 @@ def parse_jb51_new(html):
     pass
 
 def parse_jb51(html):
-    html = unicode(html)
-    html = html.replace(r'\r', '')
-    art_title = et('<h1>', '</h1>',
-                   et('<div id="daohang">', '<div id="art_info">', html))
+    """pass original html, decode here"""
+    html = et('<div id="contents">', 'class="relatedarticle', html)
+    html = html.decode('gb18030')
+    art_title = et('">', '</h1>', et('<div class="title">', '</div>', html))
     art_brief = et('<div id="art_demo">', '</div>', html)
-    art_content = et('<div id="art_content">', '<div id="art_xg">', html)
-    art_tags = list(et_all('">', '</a>', et('<div class="tags">', '</div>', html)))
-    art_related_list = et_all('<a href="', '"', et('id=relatedarticle', '</ul>', html))
-    art_related_id_list = [i.rsplit('/', 1)[1].split('.')[0]
-                           for i in art_related_list if i]
+    art_content = et('<div id="content">', '</div>', html)
+    art_tags = list(et_all('">', '</a>', et('<div class="tags', '</div>', html)))
 
     if art_brief:
         art_content = html2markdown(art_brief + '\n' + art_content)
     else:
-        art_brief = html2markdown(art_content[0:100])
+        art_brief = html2markdown(art_content[0:100] + '… …')
         art_content = html2markdown(art_content)
 
     art_brief = remove_words(art_brief)
@@ -59,7 +57,6 @@ def parse_jb51(html):
                'art_brief': 'brief',
                'art_content': 'content',
                'art_tags': 'tag_list',
-               'art_related_id_list': 'related_list'
                }
 
     d = {}
@@ -154,22 +151,11 @@ def save_to_mongo(db_name, col_name, doc_path):
 
 
 def test():
-    content = open('72000.html', 'r').read()
-    d = parse_jb51(content)
-    for k, v in d.items():
-        print k, v
-
-    content = d.get('content')
-    md = html2markdown(content)
-    with open('t.md', 'w+') as f:
-        f.write(md)
-    html = markdown2html(md)
-    with open('t.html', 'w+') as f:
-        f.write(html)
+    url = 'http://www.jb51.net/article/37995.htm'
+    content = requests.get(url).content
+    pprint(parse_jb51(content))
 
 
 if __name__ == '__main__':
-    #test()
-    #all_to_txt('/home/wnn/raw/jb51_html', '/home/wnn/raw/jb51_txt')
-    #all_to_html('/home/wnn/raw/jb51_txt', '/home/wnn/raw/jb51_txt')
-    save_to_mongo('test', 'Articles', '/home/wnn/raw/jb51_html')
+    #save_to_mongo('test', 'Articles', '/home/wnn/raw/jb51_html')
+    test()

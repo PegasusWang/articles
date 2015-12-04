@@ -12,7 +12,7 @@ from jb51_parse import parse_jb51
 class Jb51Spider(AsySpider):
     def __init__(self, urls, concurrency=10, results=None, **kwargs):
         super(Jb51Spider, self).__init__(urls, concurrency, results, **kwargs)
-        self.db = get_collection('test', 'Articles', 'motor')
+        self.db = get_collection('test', 'javascript', 'motor')    # change coll
 
     @gen.coroutine
     def update(self, url, data_dict):
@@ -26,8 +26,6 @@ class Jb51Spider(AsySpider):
 
     @gen.coroutine
     def handle_html(self, url, html):
-        html = extract('<div class="dxy_main">', '<div class="art_bot_ad">', html)
-        html = html.decode('gb18030')
         data = parse_jb51(html)
         data['source_url'] = url
         yield self.update(url, data)
@@ -35,7 +33,7 @@ class Jb51Spider(AsySpider):
 
 if __name__ == '__main__':
     urls = []
-    for page in range(10, 2000):
+    for page in range(10, 20):
         urls.append('http://www.jb51.net/article/%s.htm' % page)
     s = Jb51Spider(urls)
     s.run()

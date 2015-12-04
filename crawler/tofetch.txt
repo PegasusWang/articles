@@ -30,3 +30,5 @@ http://blog.fens.me/nodejs-restify/  # 不少高质量的nodejs，R，hadoop文�
 http://www.jeepshoe.org/914692121.htm    # 简单的递增id，跳过404
 http://dataunion.org/11601.html    #大数据相关
 http://www.sharejs.com/codes/python/9009    #脚本分享网
+
+http://www.ahlinux.com/ubuntu/18789.html    # linux文章

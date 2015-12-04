@@ -9,22 +9,18 @@ from tornado import gen
 from tornado.web import addslash, url
 
 
-class BaseHandler(JsonpHandler):
-    def initialize(self, coll):
-        self.coll = getattr(self.application._motor, coll)
-
-
-class Post(BaseHandler):
-    """通过id返回文章json数据"""
+class GetPost(JsonpHandler):
+    """通过collection名字和id返回文章json数据"""
     @gen.coroutine
-    def get(self, post_id):
+    def get(self, coll_name, post_id):
+        coll = getattr(self.application._motor, coll_name)
         try:
-            article = yield self.coll.find_one(
+            article = yield coll.find_one(
                 {'_id': ObjectId(post_id)}
             )
             article = article or {}
             if article:
-                yield self.coll.update(
+                yield coll.update(
                     {'_id': ObjectId(post_id)},
                     {
                         '$inc': {'read_count': 1}
@@ -43,5 +39,5 @@ class UpdatePost(JsonpHandler):
 
 
 articles_url = [
-    url(r'/post/(\w+)/?', Post, dict(coll='Articles'))
+    url(r'/post/(\w+)/(\w+)/?', GetPost),
 ]
