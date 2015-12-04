@@ -38,7 +38,7 @@ def parse_jb51_new(html):
 def parse_jb51(html):
     """pass original html, decode here"""
     html = et('<div id="contents">', 'class="relatedarticle', html)
-    html = html.decode('gb18030')
+    html = html.decode('gb18030', 'ignore')
     art_title = et('">', '</h1>', et('<div class="title">', '</div>', html))
     art_brief = et('<div id="art_demo">', '</div>', html)
     art_content = et('<div id="content">', '</div>', html)

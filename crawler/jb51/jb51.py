@@ -26,6 +26,7 @@ class Jb51Spider(AsySpider):
 
     @gen.coroutine
     def handle_html(self, url, html):
+        print(url)
         data = parse_jb51(html)
         data['source_url'] = url
         yield self.update(url, data)
@@ -33,7 +34,7 @@ class Jb51Spider(AsySpider):
 
 if __name__ == '__main__':
     urls = []
-    for page in range(10, 20):
+    for page in range(960, 964):
         urls.append('http://www.jb51.net/article/%s.htm' % page)
     s = Jb51Spider(urls)
     s.run()

@@ -10,4 +10,4 @@ html2text
 motor
 markdown2
 Pygments
-pymongo
+pymongo==2.8.0
