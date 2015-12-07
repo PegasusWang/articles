@@ -39,7 +39,7 @@ def xianguo_spider(q, max_news_num=1000):
 
             if not html or html == 'null':    # xianguo may returns null
                 return
-            print(html)
+
             o = json.loads(html)
             to_save = ['docid', 'source', 'content',
                        'url', 'title', 'time', 'brief']
@@ -62,7 +62,6 @@ def xianguo_spider(q, max_news_num=1000):
                 for k, v in list(locals().items()):
                     if k in to_save:
                         d[k] = v
-                pprint(d)
 
                 _COLL.update(
                     {'_id': int(docid)},
@@ -92,7 +91,7 @@ def xianguo_spider(q, max_news_num=1000):
                     print('************Finish#############')
                     return
 
-            q.put(URL, form_dict)
+            q.put((URL, form_dict))    # put a tuple
 
 
 all_id = """FT中文网 1185664
