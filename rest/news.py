@@ -7,36 +7,38 @@ from bson.json_util import dumps
 from jsonp import JsonpHandler
 from tornado import gen
 from tornado.web import addslash, url
+from lib.format_list import format_news_list
 
 
-class Post(JsonpHandler):
-    """通过collection名字和id返回文章json数据"""
+class BaseNews(JsonpHandler):
+    @property
+    def _coll(self, coll_name='news'):
+        return getattr(self.application._motor, coll_name)
+
+
+class News(BaseNews):
+
     @gen.coroutine
-    def get(self, coll_name, post_id):
-        coll = getattr(self.application._motor, coll_name)
+    def get(self, news_id):
+        coll = self._coll
         try:
-            article = yield coll.find_one(
-                {'_id': ObjectId(post_id)}
+            news = yield coll.find_one(
+                {'_id': ObjectId(news_id)}
             )
-            article = article or {}
-            if article:
-                yield coll.update(
-                    {'_id': ObjectId(post_id)},
-                    {
-                        '$inc': {'read_count': 1}
-                    },
-                    True
-                )
+            news = news or {}
         except:
-            article = {}
+            news = {}
 
-        self.write_json(dumps(article))   # or del article["_id"]
+        self.write_json(dumps(news))   # or del article["_id"]
 
+
+class NewsPage(BaseNews):
     @gen.coroutine
-    def delete(self, post_id):
-        pass
+    def get(self):
+        offset = int(self.get_query_argument('offset', 0))
+        limit = self.get_query_arguments('limit', 10)
 
 
 articles_url = [
-    url(r'/post/(\w+)/(\w+)/?', Post),
+    url(r'/post/(\w+)/(\w+)/?', News),
 ]

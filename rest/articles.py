@@ -7,9 +7,23 @@ from bson.json_util import dumps
 from jsonp import JsonpHandler
 from tornado import gen
 from tornado.web import addslash, url
+from pprint import pprint
 
 
-class Post(JsonpHandler):
+class BasePost(JsonpHandler):
+    def write_result(self, code, message, data, error=None):
+        """code, message not empty"""
+        res = {}
+        res['code'] = code
+        res['message'] = message
+        if data:
+            data['id'] = str(data['_id'])
+            del data['_id']
+            res['data'] = data
+        self.write_json(res)
+
+
+class Post(BasePost):
     """通过collection名字和id返回文章json数据"""
     @gen.coroutine
     def get(self, coll_name, post_id):
@@ -18,7 +32,7 @@ class Post(JsonpHandler):
             article = yield coll.find_one(
                 {'_id': ObjectId(post_id)}
             )
-            article = article or {}
+            article = article if article else {}
             if article:
                 yield coll.update(
                     {'_id': ObjectId(post_id)},
@@ -30,7 +44,12 @@ class Post(JsonpHandler):
         except:
             article = {}
 
-        self.write_json(dumps(article))   # or del article["_id"]
+        pprint(article)
+        if article:
+            self.write_result(0, 'success', article)
+        else:
+            self.write_result(404, 'fail', article)
+
 
     @gen.coroutine
     def delete(self, post_id):
@@ -38,5 +57,5 @@ class Post(JsonpHandler):
 
 
 articles_url = [
-    url(r'/post/(\w+)/(\w+)/?', Post),
+    url(r'/api/post/(\w+)/(\w+)/?', Post),
 ]

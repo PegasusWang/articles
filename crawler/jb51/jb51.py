@@ -33,8 +33,13 @@ class Jb51Spider(AsySpider):
 
 
 if __name__ == '__main__':
+    import sys
+    try:
+        beg, end = int(sys.argv[1]), int(sys.argv[2])
+    except:
+        beg, end = 10, 20
     urls = []
-    for page in range(960, 964):
+    for page in range(beg, end):
         urls.append('http://www.jb51.net/article/%s.htm' % page)
     s = Jb51Spider(urls)
     s.run()
