@@ -41,7 +41,7 @@ def xianguo_spider(q, max_news_num=1000):
                 return
 
             o = json.loads(html)
-            to_save = ['docid', 'source', 'content',
+            to_save = ['source', 'content',
                        'url', 'title', 'time', 'brief']
             id_list = []
 

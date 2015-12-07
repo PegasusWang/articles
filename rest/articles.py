@@ -3,31 +3,18 @@
 
 import _env
 from bson.objectid import ObjectId
-from bson.json_util import dumps
-from jsonp import JsonpHandler
+from rest_handler import RestHandler
 from tornado import gen
 from tornado.web import addslash, url
 from pprint import pprint
 
 
-class BasePost(JsonpHandler):
-    def write_result(self, code, message, data, error=None):
-        """code, message not empty"""
-        res = {}
-        res['code'] = code
-        res['message'] = message
-        if data:
-            data['id'] = str(data['_id'])
-            del data['_id']
-            res['data'] = data
-        self.write_json(res)
-
-
-class Post(BasePost):
+class Post(RestHandler):
     """通过collection名字和id返回文章json数据"""
     @gen.coroutine
     def get(self, coll_name, post_id):
         coll = getattr(self.application._motor, coll_name)
+        print(coll_name, post_id)
         try:
             article = yield coll.find_one(
                 {'_id': ObjectId(post_id)}
@@ -46,16 +33,15 @@ class Post(BasePost):
 
         pprint(article)
         if article:
-            self.write_result(0, 'success', article)
+            self.write_object(0, 'success', article)
         else:
-            self.write_result(404, 'fail', article)
-
+            self.write_object(404, 'fail', article)
 
     @gen.coroutine
     def delete(self, post_id):
         pass
 
 
-articles_url = [
+urls = [
     url(r'/api/post/(\w+)/(\w+)/?', Post),
 ]
