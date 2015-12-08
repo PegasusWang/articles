@@ -3,10 +3,13 @@
 
 import _env
 import os
+import re
 import requests
 from extract import extract, extract_all
 from tornado import gen
 from async_spider import AsySpider
+from lib.html_tools import html2markdown
+from lib.debug_tools import print_li
 from pprint import pprint
 
 
@@ -48,9 +51,9 @@ class TagpageSpider(AsySpider):
 class ArticleSpider(AsySpider):
     def handle_html(self, url, html):
         """http://www.sharejs.com/codes/javascript/9067"""
-        tag = url.rsplit('/', 2)[1]
+        kind = url.rsplit('/', 2)[1]    # kind是大分类，区别tag_list
         article_id = url.rsplit('/', 2)[-1]
-        filename = './sharejs_html/' + tag + '_' + article_id + '.html'
+        filename = './sharejs_html/' + kind + '_' + article_id + '.html'
 
         try:
             with open(filename, 'wb') as f:
@@ -59,6 +62,28 @@ class ArticleSpider(AsySpider):
         except IOError:
             if not os.path.exists('./sharejs_html'):
                 os.makedirs('./sharejs_html')
+
+
+def parse_sharejs(url, html):
+    kind = url.rsplit('/', 2)[1]    # kind是大分类，区别tag_list
+    html = html.decode('utf-8')    # decode here
+    title = extract('<h1>', '</h1>',
+                    extract('<div class="post_title">', '</div>', html))
+    post_content = extract('<div class="post_content" id="paragraph">',
+                      '<div class="hot_tags">', html)
+    post_content = re.sub(r'<span class="title">(.*?)</span>', '', post_content)
+    content = html2markdown(post_content)
+    tag_list = extract_all('">', '</a>',
+                           extract('<div class="hot_tags">', '</div>', html))
+    data = {
+        'kind': kind,
+        'title': title,
+        'source_url': url,
+        'content': content,
+        'tag_list': tag_list,
+        'read_count': 0,
+    }
+    return data
 
 
 def test():
@@ -77,6 +102,12 @@ def test_tag_page_spider():
         print(i)
 
 
+def test_parse_sharejs():
+    url = 'http://www.sharejs.com/codes/html/8654'
+    content = requests.get(url).content
+    print_li(parse_sharejs(url, content))
+
+
 def main():
     tag_urls = get_all_tag_urls()
 
@@ -93,5 +124,5 @@ def main():
 
 
 if __name__ == '__main__':
-    """稍等，少年..."""
-    main()
+    #main()
+    test_parse_sharejs()

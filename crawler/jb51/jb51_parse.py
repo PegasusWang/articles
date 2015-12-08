@@ -31,10 +31,6 @@ def remove_words(s):
     return s
 
 
-def parse_jb51_new(html):
-    """新的文章改了html标签，重新抠"""
-    pass
-
 def parse_jb51(html):
     """pass original html, decode here"""
     html = et('<div id="contents">', 'class="relatedarticle', html)

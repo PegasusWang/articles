@@ -29,6 +29,7 @@ class Jb51Spider(AsySpider):
         print(url)
         data = parse_jb51(html)
         data['source_url'] = url
+        data['read_count'] = 0
         yield self.update(url, data)
 
 
