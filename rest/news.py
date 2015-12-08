@@ -2,13 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import _env
-from bson.objectid import ObjectId
-from bson.json_util import dumps
+import traceback
 from rest_handler import RestHandler
-from tornado import gen, escape
-from tornado.web import addslash, url
-from lib.format_tools import format_news_list
-from pprint import pprint
+from tornado import gen
+from tornado.web import url
 
 
 class BaseNews(RestHandler):
@@ -22,12 +19,9 @@ class News(BaseNews):
     def get(self, news_id):
         coll = self._coll
         try:
-            news = yield coll.find_one(
-                {'_id': int(news_id)}
-            )
+            news = yield coll.find_one({'_id': int(news_id)})
             news = news or {}
-        except:
-            import traceback
+        except Exception:
             traceback.print_exc()
             news = {}
 
@@ -42,17 +36,18 @@ class NewsPage(BaseNews):
     def get(self):
         offset = int(self.get_query_argument('offset', 0))
         limit = int(self.get_query_argument('limit', 10))
-        print(offset, limit)
-        cursor = self._coll.find().sort([('time', -1)]).limit(limit).skip(offset)
+        cursor = self._coll.find()
+        cursor.sort([('time', -1)]).limit(limit).skip(offset)
+
         res = []
         while (yield cursor.fetch_next):
             doc = cursor.next_object()
             res.append(doc)
-        escape.json_encode(res)
+
         self.write_batches(0, 'success', res)
 
 
-urls = [
+URL_ROUTES = [
     url(r'/api/news/?', NewsPage),
     url(r'/api/news/(\w+)/?', News),
 ]

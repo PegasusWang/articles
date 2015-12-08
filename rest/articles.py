@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import _env
+import traceback
 from bson.objectid import ObjectId
 from rest_handler import RestHandler
 from tornado import gen
-from tornado.web import addslash, url
-from pprint import pprint
+from tornado.web import url
 
 
 class Post(RestHandler):
@@ -28,10 +28,10 @@ class Post(RestHandler):
                     },
                     True
                 )
-        except:
+        except Exception:
+            traceback.print_exc()
             article = {}
 
-        pprint(article)
         if article:
             self.write_object(0, 'success', article)
         else:
@@ -42,6 +42,6 @@ class Post(RestHandler):
         pass
 
 
-urls = [
+URL_ROUTES = [
     url(r'/api/post/(\w+)/(\w+)/?', Post),
 ]
