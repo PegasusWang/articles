@@ -42,6 +42,12 @@ class Post(RestHandler):
         pass
 
 
+class PostPage(RestHandler):
+    @gen.coroutine
+    def get(self):
+        pass
+
+
 URL_ROUTES = [
     url(r'/api/post/(\w+)/(\w+)/?', Post),
 ]

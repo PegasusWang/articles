@@ -47,6 +47,7 @@ class NewsPage(BaseNews):
             while (yield cursor.fetch_next):
                 doc = cursor.next_object()
                 res.append(doc)
+
         except Exception:
             traceback.print_exc()
             self.write_batches(404, 'fail', [])
