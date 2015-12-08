@@ -53,10 +53,6 @@ class BaseHandler(RequestHandler):
     def render(self, filename, **kwargs):
         self.finish(self.render_string(filename, **kwargs))
 
-    def write_json(self, data_dict):
-        """if data is dict, self.write default write it as json data."""
-        self.write(data_dict)
-
     def write_error(self, status_code, **kwargs):
         if status_code == 404:
             print('404')

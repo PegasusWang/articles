@@ -34,15 +34,23 @@ class News(BaseNews):
 class NewsPage(BaseNews):
     @gen.coroutine
     def get(self):
-        offset = int(self.get_query_argument('offset', 0))
-        limit = int(self.get_query_argument('limit', 10))
-        cursor = self._coll.find()
-        cursor.sort([('time', -1)]).limit(limit).skip(offset)
-
         res = []
-        while (yield cursor.fetch_next):
-            doc = cursor.next_object()
-            res.append(doc)
+        try:
+            offset = int(self.get_query_argument('offset', 0))
+            limit = int(self.get_query_argument('limit', 10))
+            if offset < 0 or limit > 50:
+                offset, limit = 0, 10
+
+            cursor = self._coll.find()
+            cursor.sort([('time', -1)]).skip(offset).limit(limit)
+
+            while (yield cursor.fetch_next):
+                doc = cursor.next_object()
+                res.append(doc)
+        except Exception:
+            traceback.print_exc()
+            self.write_batches(404, 'fail', [])
+            return
 
         self.write_batches(0, 'success', res)
 
