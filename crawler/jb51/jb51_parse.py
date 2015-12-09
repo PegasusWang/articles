@@ -8,6 +8,7 @@ import os
 import re
 import requests
 from lib._db import get_collection
+from lib.debug_tools import print_li
 from pprint import pprint
 from html2text import html2text
 from extract import extract as et
@@ -38,7 +39,8 @@ def parse_jb51(html):
     art_title = et('">', '</h1>', et('<div class="title">', '</div>', html))
     art_brief = et('<div id="art_demo">', '</div>', html)
     art_content = et('<div id="content">', '</div>', html)
-    art_tags = list(et_all('">', '</a>', et('<div class="tags', '</div>', html)))
+    art_tags = [et('">', '<', i) for i in
+        list(et_all('<a', '/a>', et('<div class="tags', '</div>', html)))]
 
     if art_brief:
         art_content = html2markdown(art_brief + '\n' + art_content)
@@ -63,8 +65,7 @@ def parse_jb51(html):
     return d
 
 
-def html2markdown(html):
-    return html2text(html)
+def html2markdown(html): return html2text(html)
 
 
 def markdown2html(md):
@@ -92,7 +93,7 @@ def all_to_txt(input_path, output_path):
             print(filename)
 
             if data.get('brief'):
-                print len(data.get('brief'))
+                print(len(data.get('brief')))
             with io.open(filename, 'w+', encoding='utf-8') as outfile:
                 data = json.dumps(data, ensure_ascii=False, encoding='utf-8',
                                   indent=4)
@@ -147,9 +148,10 @@ def save_to_mongo(db_name, col_name, doc_path):
 
 
 def test():
-    url = 'http://www.jb51.net/article/37995.htm'
+    url = 'http://www.jb51.net/article/76068.htm'
     content = requests.get(url).content
-    pprint(parse_jb51(content))
+    for k, v in (parse_jb51(content)).items():
+        print v
 
 
 if __name__ == '__main__':
