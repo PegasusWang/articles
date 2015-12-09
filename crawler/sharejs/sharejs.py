@@ -50,7 +50,7 @@ class TagpageSpider(AsySpider):
 
 
 class ArticleSpider(AsySpider):
-    coll = get_collection('test', 'tutorial', 'motor')
+    coll = get_collection('test', 'codes', 'motor')
 
     @gen.coroutine
     def update_doc(self, url, data_dict):
@@ -90,11 +90,19 @@ def parse_sharejs(url, html):
     title = extract('<h1>', '</h1>',
                     extract('<div class="post_title">', '</div>', html))
     post_content = extract('<div class="post_content" id="paragraph">',
-                      '<div class="hot_tags">', html)
+                           '<div class="hot_tags">', html)
+    if not post_content:
+        post_content = extract('<div class="post_content" id="paragraph">',
+                               '<div class="share">', html)
+
     post_content = re.sub(r'<span class="title">(.*?)</span>', '', post_content)
     content = html2markdown(post_content)
-    tag_list = extract_all('">', '</a>',
-                           extract('<div class="hot_tags">', '</div>', html))
+    try:
+        tag_list = extract_all('">', '</a>',
+                       extract('<div class="hot_tags">', '</div>', html))
+    except AttributeError:
+        tag_list = []
+
     data = {
         'kind': kind,
         'title': title,
@@ -133,7 +141,7 @@ def test_tag_page_spider():
 
 
 def test_parse_sharejs():
-    url = 'http://www.sharejs.com/codes/html/8654'
+    url = 'http://www.sharejs.com/codes/python/1201'
     content = requests.get(url).content
     print_li(parse_sharejs(url, content))
 

@@ -1,7 +1,5 @@
 jb51    # pass已爬
-伯乐在线
-http://python.jobbole.com/81153/    #
-伯乐的文章做的相当不错了，很多也可以转载用，不过只有技术相关的。
+伯乐在线 http://python.jobbole.com/81153/    # 伯乐的文章做的相当不错了，很多也可以转载用，不过只有技术相关的。
 http://www.bkjia.com/Linux/935878.html
 http://www.linuxdiyf.com/linux/14715.html
 http://www.linuxidc.com/Linux/2010-05/26394.htm
@@ -10,7 +8,6 @@ http://www.zgxue.com/itbc/article/63661.htm
 http://www.tutorialspoint.com/index.htm
 http://www.bogotobogo.com/python/python_generators.php
 http://www.webtag123.com/javascript/22907.html
-http://www.runoob.com/    # pass
 http://www.ziqiangxuetang.com/python/att-dictionary-setdefault.html
 http://www.yiibai.com/python/dictionary_setdefault.html
 http://www.chinaunix.net/
@@ -20,7 +17,8 @@ http://www.pythoner.com/205.html
 http://download.csdn.net/detail/doomlord/8449655
 http://www.111cn.net/phper/python/44052.htm
 https://pythonadventures.wordpress.com/2013/08/13/concurrent-futures/
-http://segmentfault.com/a/1190000001813992 #segmentfault文章质量比较高，并且是大陆共享3.0协议，可以任意转载保留原文。
+http://segmentfault.com/a/1190000001813992
+#segmentfault文章质量比较高，并且是大陆共享3.0协议，可以任意转载保留原文连接
 
 http://www.lxway.com/168696.html  # 这个比较好爬，递增id的url,注意递增忽略404
 
@@ -29,6 +27,5 @@ http://blog.fens.me/nodejs-restify/  # 不少高质量的nodejs，R，hadoop文�
 
 http://www.jeepshoe.org/914692121.htm    # 简单的递增id，跳过404
 http://dataunion.org/11601.html    #大数据相关
-http://www.sharejs.com/codes/python/9009    #脚本分享网
 
 http://www.ahlinux.com/ubuntu/18789.html    # linux文章
