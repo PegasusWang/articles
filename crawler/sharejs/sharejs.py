@@ -4,12 +4,13 @@
 import _env
 import os
 import re
+import html2text
 import requests
 from extract import extract, extract_all
 from tornado import gen
 from async_spider import AsySpider
-from lib.html_tools import html2markdown
 from lib.debug_tools import print_li
+from lib._db import get_collection
 from pprint import pprint
 
 
@@ -49,9 +50,11 @@ class TagpageSpider(AsySpider):
 
 
 class ArticleSpider(AsySpider):
+    coll = get_collection('test', 'tutorial', 'motor')
+
     @gen.coroutine
     def update_doc(self, url, data_dict):
-        yield self.db.update(
+        yield ArticleSpider.coll.update(
             {'source_url': url},
             {
                 '$set': data_dict
@@ -102,6 +105,15 @@ def parse_sharejs(url, html):
         'read_count': 0,
     }
     return data
+
+
+def html2markdown(html):
+    if not html:
+        return html
+    h = html2text.HTML2Text()
+    h.ignore_images = True
+    h.ignore_links = True
+    return h.handle(html)
 
 
 def test():

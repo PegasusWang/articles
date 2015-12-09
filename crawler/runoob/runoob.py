@@ -3,11 +3,13 @@
 
 import _env
 import os
-import urlparse
+import html2text
 import traceback
 import requests
+import urlparse
 from async_spider import AsySpider
 from extract import extract, extract_all
+from lib._db import get_collection
 
 """改进下爬虫，之前的是把中间拿到的url写入文本里边，
 可以给类加上results，这样就可以直接拿到结果。
@@ -61,6 +63,19 @@ class SubtagSpider(AsySpider):
         except IOError:    # 当前文件没有runoob_html文件夹
             if not os.path.exists('./runoob_html'):
                 os.makedirs('./runoob_html')
+
+
+def parse_runoob(url, html):
+    html = html.decode('utf-8')
+    # TODO
+
+
+def html2markdown(html):
+    if not html:
+        return html
+    h = html2text.HTML2Text()
+    h.ignore_links = True
+    return h.handle(html)
 
 
 def test_get_sub_urls():
