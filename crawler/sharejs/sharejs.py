@@ -49,7 +49,24 @@ class TagpageSpider(AsySpider):
 
 
 class ArticleSpider(AsySpider):
+    @gen.coroutine
+    def update_doc(self, url, data_dict):
+        yield self.db.update(
+            {'source_url': url},
+            {
+                '$set': data_dict
+            },
+            True
+        )
+
+    @gen.coroutine
     def handle_html(self, url, html):
+        print(url)
+        # article_id = url.rsplit('/', 2)[-1]
+        data = parse_sharejs(url, html)
+        yield self.update_doc(url, data)
+
+    def save_html(self, url, html):
         """http://www.sharejs.com/codes/javascript/9067"""
         kind = url.rsplit('/', 2)[1]    # kind是大分类，区别tag_list
         article_id = url.rsplit('/', 2)[-1]
@@ -79,6 +96,7 @@ def parse_sharejs(url, html):
         'kind': kind,
         'title': title,
         'source_url': url,
+        'source': 'www.sharejs.com',
         'content': content,
         'tag_list': tag_list,
         'read_count': 0,
@@ -124,5 +142,5 @@ def main():
 
 
 if __name__ == '__main__':
-    #main()
-    test_parse_sharejs()
+    # test_parse_sharejs()
+    main()

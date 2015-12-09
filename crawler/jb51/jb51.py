@@ -15,7 +15,7 @@ class Jb51Spider(AsySpider):
         self.db = get_collection('test', 'articles', 'motor')    # change coll
 
     @gen.coroutine
-    def update(self, url, data_dict):
+    def update_doc(self, url, data_dict):
         yield self.db.update(
             {'source_url': url},
             {
@@ -30,7 +30,8 @@ class Jb51Spider(AsySpider):
         data = parse_jb51(html)
         data['source_url'] = url
         data['read_count'] = 0
-        yield self.update(url, data)
+        data['source'] = 'www.jb51.net'
+        yield self.update_doc(url, data)
 
 
 if __name__ == '__main__':
