@@ -52,9 +52,9 @@ users = [
 
 tags = [
     {
-        "id": 1,
-        "name": u'文章',
-        "slug": u'文章',
+        "id": 1000,
+        "name": u'代码',
+        "slug": u'代码',
         "description": ""
     }
 ]
@@ -96,7 +96,7 @@ def migrate(limit=10):
             "version": "003"
         }
     }
-    coll = get_collection('test', 'article')
+    coll = get_collection('test', 'code')
 
     posts = []
     posts_tags = []
@@ -112,7 +112,7 @@ def migrate(limit=10):
 
         posts.append(replace_post(doc))
         posts_tags.append(
-            {"tag_id": 1, "post_id": post_id}
+            {"tag_id": 1000, "post_id": post_id}
         )
 
     data = {
@@ -132,7 +132,8 @@ def tag_migrate(limit=10):
             "version": "003"
         }
     }
-    coll = get_collection('test', 'article')
+    #coll = get_collection('test', 'articles')
+    coll = get_collection('test', 'code')
 
     posts = []
     tags_id_map = {}
@@ -187,20 +188,9 @@ def tag_migrate(limit=10):
     return res
 
 
-def test():
-    print(find_first_tag('正则表达式指南'))
-
-
 def main():
     res = migrate(200)
     print(json.dumps(res, indent=4))
-    '''
-    tags = res.get('data').get('tags')
-    for i in tags:
-        #print(i.get('name'), i.get('slug'))
-        #print i.get('name')
-        print i.get('slug')
-    '''
 
 if __name__ == '__main__':
     #test()

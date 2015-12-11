@@ -38,7 +38,10 @@ def parse_jb51(html):
     html = html.decode('gb18030', 'ignore')
     art_title = et('">', '</h1>', et('<div class="title">', '</div>', html))
     art_brief = et('<div id="art_demo">', '</div>', html)
-    art_content = et('<div id="content">', '</div>', html)
+    art_content = et('<div id="contents">', '</div><!--endmain-->', html)
+    if not art_content:
+        art_content = et('<div id="content">', '</div><!--endmain-->', html)
+
     art_tags = [et('">', '<', i) for i in
         list(et_all('<a', '/a>', et('<div class="tags', '</div>', html)))]
 
@@ -65,7 +68,8 @@ def parse_jb51(html):
     return d
 
 
-def html2markdown(html): return html2text(html)
+def html2markdown(html):
+    return html2text(html)
 
 
 def markdown2html(md):
@@ -148,10 +152,10 @@ def save_to_mongo(db_name, col_name, doc_path):
 
 
 def test():
-    url = 'http://www.jb51.net/article/76068.htm'
+    url = 'http://www.jb51.net/article/74084.htm'
     content = requests.get(url).content
     for k, v in (parse_jb51(content)).items():
-        print v
+        print k, v
 
 
 if __name__ == '__main__':

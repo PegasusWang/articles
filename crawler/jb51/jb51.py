@@ -12,7 +12,7 @@ from jb51_parse import parse_jb51
 class Jb51Spider(AsySpider):
     def __init__(self, urls, concurrency=10, results=None, **kwargs):
         super(Jb51Spider, self).__init__(urls, concurrency, results, **kwargs)
-        self.db = get_collection('test', 'articles', 'motor')    # change coll
+        self.db = get_collection('test', 'article', 'motor')    # change coll
 
     @gen.coroutine
     def update_doc(self, url, data_dict):

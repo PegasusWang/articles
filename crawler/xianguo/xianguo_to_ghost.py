@@ -5,20 +5,16 @@ import _env
 import json
 import re
 import time
+from html2text import html2text
+from extract import extract
 from lib._db import get_collection
 
 pat = re.compile('[-#\w]+')
 
 
-def find_first_tag(s):
-    m = pat.search(s)
-    return m.group() if m else s
-
-
-def remove_china_char(s):
-    if not s:
-        return s
-    return re.sub(ur"[\u4e00-\u9fa5]+", '', s)
+def get_first_img(html):
+    img_url = extract('<img src="', '"', html)
+    return img_url
 
 
 def cur_timestamp():
@@ -50,22 +46,57 @@ users = [
 ]
 
 
+all_id = """钛媒体 1410319
+创业邦 1057591
+36氪 1057676
+快鲤鱼 1382170
+创业家 1132786
+TechCrunch 中国 1847011
+小众软件 1000542
+极客公园 1250579
+爱范儿 1000806
+i黑马 1236199
+新智派 2271997
+瘾科技 1000192
+InfoQ中文站 1000521
+互联网的那点事 1057660
+TECH2IPO创见 1059587"""
+
+
 tags = [
     {
-        "id": 1,
-        "name": u'文章',
-        "slug": u'文章',
+        "id": 3000,
+        "name": u"新闻",
+        "slug": u"新闻",
         "description": ""
     }
 ]
+tag_id_map = {}
 
+
+def gen_tag_id():
+    tag_li = all_id.split('\n')
+    for i in tag_li:
+        tag = i.split()[0]
+        tag_id = int(i.split()[-1])
+        tag_id_map[tag] = tag_id
+
+    for tag, tag_id in tag_id_map.items():
+        tags.append(
+            {
+                "id": tag_id,
+                "name": tag,
+                "slug": tag,
+                "description": ""
+            }
+        )
 
 def replace_post(post_data):
     d = {
         "id": 5,
         "title":        "my blog post title",
         "slug":         "my-blog-post-title",
-        "markdown":     "the *markdown* formatted post body",
+        "markdown":     "",
         #"html":         "the <i>html</i> formatted post body",
         "image":        None,
         "featured":     0,
@@ -82,38 +113,48 @@ def replace_post(post_data):
         "published_at": cur_timestamp(),
         "published_by": 1
     }
-    d['id'] = int(post_data['source_url'].rsplit('/', 1)[1].split('.')[0])
+    d['id'] = int(str(post_data['_id']))
     d['title'] = post_data['title'].strip()
-    d['slug'] = post_data['title'].strip().replace(' ', '-').lower()
-    d['markdown'] = post_data['content'].strip()
+    d['slug'] = post_data['title'].strip().replace(' ', '-')
+
+    #print d['slug'], len(d['slug']), len(d['slug'].encode()) >= 150
+    html = post_data['content'].strip()
+    d['image'] = get_first_img(html)
+    d['markdown'] = html
+    d['published_at'] = int(post_data['time']) * 1000
     return d
 
 
 def migrate(limit=10):
+    gen_tag_id()    # gen tag first
     res = {
         "meta": {
             "exported_on": cur_timestamp(),
             "version": "003"
         }
     }
-    coll = get_collection('test', 'article')
+    coll = get_collection('test', 'news')
 
     posts = []
     posts_tags = []
     index = 0
 
+    slug_set = set()
     for doc in coll.find().batch_size(1000):
-        #print(doc.get('title'))
         doc_id = doc.get('_id')
-        post_id = int(doc['source_url'].rsplit('/', 1)[1].split('.')[0])
         index += 1
         if index > limit:
             break
-
-        posts.append(replace_post(doc))
-        posts_tags.append(
-            {"tag_id": 1, "post_id": post_id}
-        )
+        slug = doc.get('title')
+        if len(slug) > 30:
+            slug = slug[0:30]
+        doc['title'] = slug
+        if slug not in slug_set:
+            slug_set.add(slug)
+            posts.append(replace_post(doc))
+            posts_tags.append(
+                {"tag_id": 3000, "post_id": int(doc_id)}
+            )
 
     data = {
         "posts": posts,
@@ -132,7 +173,8 @@ def tag_migrate(limit=10):
             "version": "003"
         }
     }
-    coll = get_collection('test', 'article')
+    #coll = get_collection('test', 'articles')
+    coll = get_collection('test', 'code')
 
     posts = []
     tags_id_map = {}
@@ -187,21 +229,9 @@ def tag_migrate(limit=10):
     return res
 
 
-def test():
-    print(find_first_tag('正则表达式指南'))
-
-
 def main():
-    res = migrate(200)
+    res = migrate(100)
     print(json.dumps(res, indent=4))
-    '''
-    tags = res.get('data').get('tags')
-    for i in tags:
-        #print(i.get('name'), i.get('slug'))
-        #print i.get('name')
-        print i.get('slug')
-    '''
 
 if __name__ == '__main__':
-    #test()
     main()
