@@ -94,14 +94,14 @@ def replace_post(post_data):
     return d
 
 
-def migrate(limit=10):
+def migrate(coll_name, limit=10):
     res = {
         "meta": {
             "exported_on": cur_timestamp(),
             "version": "003"
         }
     }
-    coll = get_collection(DB, 'code')
+    coll = get_collection(DB, coll_name)
 
     posts = []
     posts_tags = []
@@ -121,14 +121,14 @@ def migrate(limit=10):
                 {"tag_id": 1000, "post_id": post_id}
             )
 
-        data = {
-            "posts": posts,
-            "tags": TAGS,
-            "posts_tags": posts_tags,
-            "users": USERS
-        }
-        res["data"] = data
-        return res
+    data = {
+        "posts": posts,
+        "tags": TAGS,
+        "posts_tags": posts_tags,
+        "users": USERS
+    }
+    res["data"] = data
+    return res
 
 
 def tag_migrate(limit=10):
@@ -199,7 +199,7 @@ def main():
         cnt = int(sys.argv[1])
     except:
         cnt = 10
-    res = migrate(cnt)
+    res = migrate('code', cnt)
     print(json.dumps(res, indent=4))
 
 if __name__ == '__main__':

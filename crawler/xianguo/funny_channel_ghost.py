@@ -26,6 +26,8 @@ FUN来了 2235038
 
 def get_first_img(html):
     img_url = extract('<img src="', '"', html)
+    if img_url and len(img_url) > 1800:
+        return None
     return img_url
 
 

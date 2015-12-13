@@ -201,8 +201,8 @@ def main():
     try:
         cnt = int(sys.argv[1])
     except:
-        cnt = 10
-    res = migrate(cnt)
+        cnt = 3000
+    res = migrate('article', cnt)
     print(json.dumps(res, indent=4))
 
 
