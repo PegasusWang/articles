@@ -7,6 +7,9 @@ import json
 import requests
 from pprint import pprint
 from lib._db import get_collection
+from config.config import CONFIG
+DB = CONFIG.MONGO.DATABASE
+
 try:
     from Queue import Queue
 except ImportError:
@@ -28,10 +31,9 @@ def to_dict(form):
 def fetch(url, data_dict=None):
     return requests.post(url, data=data_dict).text
 
-_COLL = get_collection('test', 'news')
 
-
-def xianguo_spider(q, max_news_num=1000):
+def xianguo_spider(q, coll_name='tech', max_news_num=1000):
+    _COLL = get_collection(DB, coll_name)
     while True:
         while not q.empty():
             url, data_dict = q.get()
@@ -93,8 +95,24 @@ def xianguo_spider(q, max_news_num=1000):
 
             q.put((URL, form_dict))    # put a tuple
 
+PROGRAM_ID = """JavaEye博客 1001482
+InfoQ中文站 1000521
+LUPA开源社区 1000506
+Linux公社 10007938
+Planet Python 1017844
+CSDN博客 1001245
+博客园首页精华 1001071"""
 
-all_id = """钛媒体 1410319
+FUNNY_ID = """咋整 1945702
+挖段子网 » 挖趣图 1687446
+有意思吧 1000003
+FUN来了 2235038
+青年图摘 1765557
+蛋花儿 1763500
+掘图志 1000226
+神吐槽 2256329"""
+
+TECH_ID = """钛媒体 1410319
 创业邦 1057591
 36氪 1057676
 快鲤鱼 1382170
@@ -106,13 +124,12 @@ TechCrunch 中国 1847011
 i黑马 1236199
 新智派 2271997
 瘾科技 1000192
-InfoQ中文站 1000521
 互联网的那点事 1057660
-TECH2IPO创见 1059587"""
+tech2ipo创见 1059587"""
 
 
-def get_sectionid_list():
-    name_list = (all_id.split('\n'))
+def get_sectionid_list(title_section_str):
+    name_list = (title_section_str.split('\n'))
     res = []
     for i in name_list:
         l = i.split()
@@ -120,14 +137,21 @@ def get_sectionid_list():
     return res
 
 
-def main():
+def run_spider(title_section_str, coll_name):
     q = Queue()
     formstr = 'devicemodel=motorola-XT1079&isShowContent=1&maxid=1000000000&sectionid=%d&sectiontype=0&version=77&count=25&udid=355456060447393&devicetype=5&isThumb=1&'
-    for sid in get_sectionid_list():
+    for sid in get_sectionid_list(title_section_str):
         s = formstr % (int(sid))
         print(s)
         q.put((URL, to_dict(s)))
-        xianguo_spider(q)
+        xianguo_spider(q, coll_name)
+
+
+def main():
+    for s in ['PROGRAM', 'FUNNY', 'TECH']:
+        title_section_str = globals().get(s+'_ID')
+        coll_name = s.lower()
+        run_spider(title_section_str, coll_name)
 
 
 if __name__ == '__main__':

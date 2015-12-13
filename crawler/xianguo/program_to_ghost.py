@@ -5,25 +5,17 @@ import _env
 import json
 import re
 import time
+from html2text import html2text
+from extract import extract
 from lib._db import get_collection
-from tornado.escape import xhtml_unescape
 from judge_upload import exist_or_insert
 from config.config import CONFIG
 DB = CONFIG.MONGO.DATABASE
 
 
-PAT = re.compile('[-#\w]+')
-
-
-def find_first_tag(s):
-    m = PAT.search(s)
-    return m.group() if m else s
-
-
-def remove_china_char(s):
-    if not s:
-        return s
-    return re.sub(ur"[\u4e00-\u9fa5]+", '', s)
+def get_first_img(html):
+    img_url = extract('<img src="', '"', html)
+    return img_url
 
 
 def cur_timestamp():
@@ -33,8 +25,8 @@ def cur_timestamp():
 USERS = [
     {
         "id":           1,
-        "name":         "man",
-        "slug":         "man",
+        "name":         "jishushare",
+        "slug":         "jishushare",
         "email":        "user@example.com",
         "image":        None,
         "cover":        None,
@@ -55,22 +47,50 @@ USERS = [
 ]
 
 
+# title section_id from xianguo json
+PROGRAM_ID = """JavaEye博客 1001482
+InfoQ中文站 1000521
+LUPA开源社区 1000506
+Linux公社 10007938
+Planet Python 1017844
+CSDN博客 1001245
+博客园首页精华 1001071"""
+
+
 TAGS = [
     {
-        "id": 1000,
-        "name": u'代码',
-        "slug": u'code',
+        "id": 4000,
+        "name": u"技术",
+        "slug": u"program",
         "description": ""
     }
 ]
+TAG_ID_MAP = {}
 
+
+def gen_tag_id():
+    tag_li = PROGRAM_ID.split('\n')
+    for i in tag_li:
+        tag = i.split()[0]
+        tag_id = int(i.split()[-1])
+        TAG_ID_MAP[tag] = tag_id
+
+    for tag, tag_id in TAG_ID_MAP.items():
+        TAGS.append(
+            {
+                "id": tag_id,
+                "name": tag,
+                "slug": tag,
+                "description": ""
+            }
+        )
 
 def replace_post(post_data):
     d = {
         "id": 5,
         "title":        "my blog post title",
         "slug":         "my-blog-post-title",
-        "markdown":     "the *markdown* formatted post body",
+        "markdown":     "",
         #"html":         "the <i>html</i> formatted post body",
         "image":        None,
         "featured":     0,
@@ -87,48 +107,59 @@ def replace_post(post_data):
         "published_at": cur_timestamp(),
         "published_by": 1
     }
-    d['id'] = int(post_data['source_url'].rsplit('/', 1)[1].split('.')[0])
+    d['id'] = int(str(post_data['_id']))
     d['title'] = post_data['title'].strip()
-    d['slug'] = post_data['title'].strip().replace(' ', '-').lower()
-    d['markdown'] = xhtml_unescape(post_data['content'].strip())    # unescape
+    d['slug'] = post_data['title'].strip().replace(' ', '-')
+
+    #print d['slug'], len(d['slug']), len(d['slug'].encode()) >= 150
+    html = post_data['content'].strip()
+    d['image'] = get_first_img(html)
+    d['markdown'] = html
+    d['published_at'] = int(post_data['time']) * 1000
     return d
 
 
-def migrate(limit=10):
+def migrate(coll_name, limit=10):
+    coll = get_collection(DB, coll_name)
+    # gen_tag_id()    # gen tag first
     res = {
         "meta": {
             "exported_on": cur_timestamp(),
             "version": "003"
         }
     }
-    coll = get_collection(DB, 'code')
 
     posts = []
     posts_tags = []
     index = 0
 
+    slug_set = set()
     for doc in coll.find().batch_size(1000):
         title = doc.get('title')
         if not exist_or_insert(title):
             doc_id = doc.get('_id')
-            post_id = int(doc['source_url'].rsplit('/', 1)[1].split('.')[0])
             index += 1
             if index > limit:
                 break
+            slug = doc.get('title')
+            if len(slug) > 30:
+                slug = slug[0:30]
+            doc['title'] = slug
+            if slug not in slug_set:
+                slug_set.add(slug)
+                posts.append(replace_post(doc))
+                posts_tags.append(
+                    {"tag_id": TAGS[0].get('id'), "post_id": int(doc_id)}
+                )
 
-            posts.append(replace_post(doc))
-            posts_tags.append(
-                {"tag_id": 1000, "post_id": post_id}
-            )
-
-        data = {
-            "posts": posts,
-            "tags": TAGS,
-            "posts_tags": posts_tags,
-            "users": USERS
-        }
-        res["data"] = data
-        return res
+    data = {
+        "posts": posts,
+        "tags": TAGS,
+        "posts_tags": posts_tags,
+        "users": USERS
+    }
+    res["data"] = data
+    return res
 
 
 def tag_migrate(limit=10):
@@ -187,7 +218,7 @@ def tag_migrate(limit=10):
         "posts": posts,
         "tags": TAGS,
         "posts_tags": posts_tags,
-        "users": users
+        "users": USERS
     }
     res["data"] = data
     return res
@@ -199,7 +230,7 @@ def main():
         cnt = int(sys.argv[1])
     except:
         cnt = 10
-    res = migrate(cnt)
+    res = migrate('program', cnt)
     print(json.dumps(res, indent=4))
 
 if __name__ == '__main__':

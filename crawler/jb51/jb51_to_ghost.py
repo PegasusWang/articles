@@ -6,12 +6,16 @@ import json
 import re
 import time
 from lib._db import get_collection
+from config.config import CONFIG
+from judge_upload import exist_or_insert
+DB = CONFIG.MONGO.DATABASE
 
-pat = re.compile('[-#\w]+')
+
+PAT = re.compile('[-#\w]+')
 
 
 def find_first_tag(s):
-    m = pat.search(s)
+    m = PAT.search(s)
     return m.group() if m else s
 
 
@@ -25,11 +29,11 @@ def cur_timestamp():
     return int(time.time() * 1000)
 
 
-users = [
+USERS = [
     {
         "id":           1,
-        "name":         "man",
-        "slug":         "man",
+        "name":         "jishushare",
+        "slug":         "jishushare",
         "email":        "user@example.com",
         "image":        None,
         "cover":        None,
@@ -50,11 +54,11 @@ users = [
 ]
 
 
-tags = [
+TAGS = [
     {
         "id": 1,
         "name": u'文章',
-        "slug": u'文章',
+        "slug": u'article',
         "description": ""
     }
 ]
@@ -89,37 +93,38 @@ def replace_post(post_data):
     return d
 
 
-def migrate(limit=10):
+def migrate(coll_name='article', limit=10):
     res = {
         "meta": {
             "exported_on": cur_timestamp(),
             "version": "003"
         }
     }
-    coll = get_collection('test', 'article')
+    coll = get_collection(DB, coll_name)
 
     posts = []
     posts_tags = []
     index = 0
 
     for doc in coll.find().batch_size(1000):
-        #print(doc.get('title'))
-        doc_id = doc.get('_id')
-        post_id = int(doc['source_url'].rsplit('/', 1)[1].split('.')[0])
-        index += 1
-        if index > limit:
-            break
+        title = doc.get('title')
+        if not exist_or_insert(title):
+            doc_id = doc.get('_id')
+            post_id = int(doc['source_url'].rsplit('/', 1)[1].split('.')[0])
+            index += 1
+            if index > limit:
+                break
 
-        posts.append(replace_post(doc))
-        posts_tags.append(
-            {"tag_id": 1, "post_id": post_id}
-        )
+            posts.append(replace_post(doc))
+            posts_tags.append(
+                {"tag_id": 1, "post_id": post_id}
+            )
 
     data = {
         "posts": posts,
-        "tags": tags,
+        "tags": TAGS,
         "posts_tags": posts_tags,
-        "users": users
+        "users": USERS
     }
     res["data"] = data
     return res
@@ -132,7 +137,7 @@ def tag_migrate(limit=10):
             "version": "003"
         }
     }
-    coll = get_collection('test', 'article')
+    coll = get_collection(DB, 'article')
 
     posts = []
     tags_id_map = {}
@@ -162,7 +167,7 @@ def tag_migrate(limit=10):
 
             if save_tag not in tags_id_map:
                 tag_id += 1
-                tags.append({
+                TAGS.append({
                     "id": tag_id,
                     "name": save_tag,
                     "slug": save_tag,
@@ -179,9 +184,9 @@ def tag_migrate(limit=10):
 
     data = {
         "posts": posts,
-        "tags": tags,
+        "tags": TAGS,
         "posts_tags": posts_tags,
-        "users": users
+        "users": USERS
     }
     res["data"] = data
     return res
@@ -192,16 +197,14 @@ def test():
 
 
 def main():
-    res = migrate(200)
+    import sys
+    try:
+        cnt = int(sys.argv[1])
+    except:
+        cnt = 10
+    res = migrate(cnt)
     print(json.dumps(res, indent=4))
-    '''
-    tags = res.get('data').get('tags')
-    for i in tags:
-        #print(i.get('name'), i.get('slug'))
-        #print i.get('name')
-        print i.get('slug')
-    '''
+
 
 if __name__ == '__main__':
-    #test()
     main()

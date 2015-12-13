@@ -12,6 +12,8 @@ from async_spider import AsySpider
 from lib.debug_tools import print_li
 from lib._db import get_collection
 from pprint import pprint
+from config.config import CONFIG
+DB = CONFIG.MONGO.DATABASE
 
 
 def get_all_tag_urls(url='http://www.sharejs.com/codes/'):
@@ -50,7 +52,7 @@ class TagpageSpider(AsySpider):
 
 
 class ArticleSpider(AsySpider):
-    coll = get_collection('test', 'codes', 'motor')
+    coll = get_collection(DB, 'codes', 'motor')
 
     @gen.coroutine
     def update_doc(self, url, data_dict):

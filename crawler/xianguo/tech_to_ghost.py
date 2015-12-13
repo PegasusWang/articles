@@ -8,8 +8,9 @@ import time
 from html2text import html2text
 from extract import extract
 from lib._db import get_collection
-
-pat = re.compile('[-#\w]+')
+from judge_upload import exist_or_insert
+from config.config import CONFIG
+DB = CONFIG.MONGO.DATABASE
 
 
 def get_first_img(html):
@@ -21,11 +22,11 @@ def cur_timestamp():
     return int(time.time() * 1000)
 
 
-users = [
+USERS = [
     {
         "id":           1,
-        "name":         "man",
-        "slug":         "man",
+        "name":         "jishushare",
+        "slug":         "jishushare",
         "email":        "user@example.com",
         "image":        None,
         "cover":        None,
@@ -46,7 +47,8 @@ users = [
 ]
 
 
-all_id = """钛媒体 1410319
+# title section_id from xianguo json
+TECH_ID = """钛媒体 1410319
 创业邦 1057591
 36氪 1057676
 快鲤鱼 1382170
@@ -58,31 +60,30 @@ TechCrunch 中国 1847011
 i黑马 1236199
 新智派 2271997
 瘾科技 1000192
-InfoQ中文站 1000521
 互联网的那点事 1057660
 TECH2IPO创见 1059587"""
 
 
-tags = [
+TAGS = [
     {
         "id": 3000,
         "name": u"新闻",
-        "slug": u"新闻",
+        "slug": u"news",
         "description": ""
     }
 ]
-tag_id_map = {}
+TAG_ID_MAP = {}
 
 
 def gen_tag_id():
-    tag_li = all_id.split('\n')
+    tag_li = TECH_ID.split('\n')
     for i in tag_li:
         tag = i.split()[0]
         tag_id = int(i.split()[-1])
-        tag_id_map[tag] = tag_id
+        TAG_ID_MAP[tag] = tag_id
 
-    for tag, tag_id in tag_id_map.items():
-        tags.append(
+    for tag, tag_id in TAG_ID_MAP.items():
+        TAGS.append(
             {
                 "id": tag_id,
                 "name": tag,
@@ -125,15 +126,15 @@ def replace_post(post_data):
     return d
 
 
-def migrate(limit=10):
-    gen_tag_id()    # gen tag first
+def migrate(coll_name, limit=10):
+    coll = get_collection(DB, coll_name)
+    # gen_tag_id()    # gen tag first
     res = {
         "meta": {
             "exported_on": cur_timestamp(),
             "version": "003"
         }
     }
-    coll = get_collection('test', 'news')
 
     posts = []
     posts_tags = []
@@ -141,26 +142,28 @@ def migrate(limit=10):
 
     slug_set = set()
     for doc in coll.find().batch_size(1000):
-        doc_id = doc.get('_id')
-        index += 1
-        if index > limit:
-            break
-        slug = doc.get('title')
-        if len(slug) > 30:
-            slug = slug[0:30]
-        doc['title'] = slug
-        if slug not in slug_set:
-            slug_set.add(slug)
-            posts.append(replace_post(doc))
-            posts_tags.append(
-                {"tag_id": 3000, "post_id": int(doc_id)}
-            )
+        title = doc.get('title')
+        if not exist_or_insert(title):
+            doc_id = doc.get('_id')
+            index += 1
+            if index > limit:
+                break
+            slug = doc.get('title')
+            if len(slug) > 30:
+                slug = slug[0:30]
+            doc['title'] = slug
+            if slug not in slug_set:
+                slug_set.add(slug)
+                posts.append(replace_post(doc))
+                posts_tags.append(
+                    {"tag_id": TAGS[0].get('id'), "post_id": int(doc_id)}
+                )
 
     data = {
         "posts": posts,
-        "tags": tags,
+        "tags": TAGS,
         "posts_tags": posts_tags,
-        "users": users
+        "users": USERS
     }
     res["data"] = data
     return res
@@ -173,8 +176,7 @@ def tag_migrate(limit=10):
             "version": "003"
         }
     }
-    #coll = get_collection('test', 'articles')
-    coll = get_collection('test', 'code')
+    coll = get_collection(DB, 'code')
 
     posts = []
     tags_id_map = {}
@@ -204,7 +206,7 @@ def tag_migrate(limit=10):
 
             if save_tag not in tags_id_map:
                 tag_id += 1
-                tags.append({
+                TAGS.append({
                     "id": tag_id,
                     "name": save_tag,
                     "slug": save_tag,
@@ -221,16 +223,21 @@ def tag_migrate(limit=10):
 
     data = {
         "posts": posts,
-        "tags": tags,
+        "tags": TAGS,
         "posts_tags": posts_tags,
-        "users": users
+        "users": USERS
     }
     res["data"] = data
     return res
 
 
 def main():
-    res = migrate(100)
+    import sys
+    try:
+        cnt = int(sys.argv[1])
+    except:
+        cnt = 10
+    res = migrate('tech', cnt)
     print(json.dumps(res, indent=4))
 
 if __name__ == '__main__':
