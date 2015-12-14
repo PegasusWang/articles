@@ -95,6 +95,7 @@ def xianguo_spider(q, coll_name='tech', max_news_num=1000):
 
             q.put((URL, form_dict))    # put a tuple
 
+
 PROGRAM_ID = """JavaEye博客 1001482
 InfoQ中文站 1000521
 LUPA开源社区 1000506

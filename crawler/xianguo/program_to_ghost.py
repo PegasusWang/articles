@@ -24,6 +24,11 @@ def cur_timestamp():
     return int(time.time() * 1000)
 
 
+def add_source(content, url, source):
+    ori_url = '<a href="%s">来自〔%s〕</a>' % (url, source)
+    return content + ori_url
+
+
 USERS = [
     {
         "id":           1,
@@ -113,10 +118,9 @@ def replace_post(post_data):
     d['title'] = post_data['title'].strip()
     d['slug'] = post_data['title'].strip().replace(' ', '-')
 
-    #print d['slug'], len(d['slug']), len(d['slug'].encode()) >= 150
     html = post_data['content'].strip()
     d['image'] = get_first_img(html)
-    d['markdown'] = html
+    d['markdown'] = add_source(html, post_data['url'], post_data['source'])
     d['published_at'] = int(post_data['time']) * 1000
     return d
 
