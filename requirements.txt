@@ -11,3 +11,4 @@ motor
 markdown2
 Pygments
 pymongo==2.8.0
+pytest

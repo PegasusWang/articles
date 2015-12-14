@@ -12,13 +12,13 @@ from config.config import CONFIG
 
 DB = CONFIG.MONGO.DATABASE
 _COLL = get_collection(DB, 'uploaded')
-TITLE_SET = set()
-for doc in _COLL.find().batch_size(1000):
-    TITLE_SET.add(doc.get('title'))
 
 
 def is_uploaded(title):
-    return title in TITLE_SET
+    doc = _COLL.find_one({'title': title})
+    if doc is None:
+        return False
+    return True
 
 
 def insert_uploaded(title):
