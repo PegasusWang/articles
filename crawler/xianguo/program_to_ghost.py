@@ -140,7 +140,7 @@ def migrate(coll_name, limit=10):
     index = 0
 
     slug_set = set()
-    for doc in coll.find().batch_size(1000):
+    for doc in coll.find().sort('time', -1).batch_size(1000):
         title = doc.get('title')
         if not exist_or_insert(title):
             doc_id = doc.get('_id')

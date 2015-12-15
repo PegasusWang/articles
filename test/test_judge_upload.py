@@ -10,7 +10,7 @@ def test_exist_or_insert():
 
 
 def test_is_uploaded():
-    title = "我是测试题20151612"
+    title = "我是测试题20151850"
     assert not is_uploaded(title)
     insert_uploaded(title)
     assert is_uploaded(title)
