@@ -28,3 +28,5 @@ http://www.jeepshoe.org/914692121.htm    # 简单的递增id，跳过404
 http://dataunion.org/11601.html    #大数据相关
 
 http://www.ahlinux.com/ubuntu/18789.html    # linux文章
+http://www.shangxueba.com/jingyan/2265420.html
+http://chuansong.me/account/awesomeport?start=1056   #传送门
