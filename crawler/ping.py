@@ -1,27 +1,35 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-"""ping脚本，有新文章发布的时候通知搜索引擎. py2"""
+"""ping脚本，有新文章发布的时候通知搜索引擎.
+只需要标注库, 支持python3
+"""
 
 
+import os
 import re
 import time
-import urllib2
-import xmlrpclib    # py2
+try:
+    from urllib2 import urlopen
+    from xmlrpclib import ServerProxy
+except ImportError:    # py3
+    from urllib.request import urlopen
+    from xmlrpc.client import ServerProxy
 
 
 def ping(ping_url, site_name, site_host, post_url, rss_url):
+    """ping single service"""
     print('ping...', ping_url, post_url)
-    rpc_server = xmlrpclib.ServerProxy(ping_url)
+    rpc_server = ServerProxy(ping_url)
     result = rpc_server.weblogUpdates.extendedPing(
         site_name, site_host, "http://"+post_url, "http://"+rss_url
     )
-    print(result)
-    with open('ping.url', 'a+') as f:
+    print(result)    # baidu return 0 means ping success
+    with open('./ping.txt', 'a+') as f:    # save url
         f.write(post_url+'\n')
 
 
-def ping_all(*args, **kwds):
+def ping_all(site_name, site_host, post_url, rss_url):
     ping_url_list = [
         'http://ping.baidu.com/ping/RPC2', # http://zhanzhang.baidu.com/tools/ping
         #'http://rpc.pingomatic.com/',    # must every 5 minutes
@@ -30,25 +38,28 @@ def ping_all(*args, **kwds):
         #'http://blog.youdao.com/ping/RPC2',
         #'http://ping.feedburner.com',
     ]
-    for url in ping_url_list:
+    for ping_url in ping_url_list:
         try:
-            ping(url, *args, **kwds)
+            ping(ping_url, site_name, site_host, post_url, rss_url)
         except Exception:
             print('ping fail', post_url)
             continue
 
 
 def get_all_post_url(rss_url='http://jishushare.com/sitemap-posts.xml'):
-    """rss_url 博客的rss地址"""
-    response = urllib2.urlopen(rss_url)
-    html = response.read()
+    """rss_url 博客的rss地址, 用来拿到所有文章"""
+    response = urlopen(rss_url)
+    html = response.read().decode('utf-8')    # your sitemap page encoding
     pat = re.compile('<loc>http://(.*?)</loc>')
-    url_list = ['http://'+url for url in pat.findall(html)]
+    url_list = ['http://'+url.strip() for url in pat.findall(html)]
     return set(url_list)
 
 
-def get_already_ping_url(f='./ping.url'):
-    with open(f, 'r+') as f:
+def get_already_ping_url(f='./ping.txt'):
+    """防止重复ping，在ping.txt里保存已经ping过的url"""
+    if not os.path.exists(f):
+        open(f, 'a').close()
+    with open(f, 'r') as f:
         return set([url.strip() for url in f.readlines() if url])
 
 
@@ -70,7 +81,7 @@ def ping_jishushare():
         ping_all(site_name, site_host, post_url, rss_url)
 
 
-def ping_jishushare():
+def ping_ningningtoday():
     rss_url = 'http://ningning.today/sitemap.xml'
     to_ping_url_list = get_all_post_url(rss_url) - get_already_ping_url()
     site_name = "Pegasus的博客"
@@ -82,3 +93,5 @@ def ping_jishushare():
 
 if __name__ == '__main__':
     ping_jishushare()
+    ping_ningningtoday()
+    print('finish')
