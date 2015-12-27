@@ -41,8 +41,8 @@ def ping_all(site_name, site_host, post_url, rss_url):
     for ping_url in ping_url_list:
         try:
             ping(ping_url, site_name, site_host, post_url, rss_url)
-        except Exception:
-            print('ping fail', post_url)
+        except Exception as e:
+            print('ping fail', post_url, e)
             continue
 
 

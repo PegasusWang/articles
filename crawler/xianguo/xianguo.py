@@ -29,7 +29,7 @@ def to_dict(form):
 
 
 def fetch(url, data_dict=None):
-    return requests.post(url, data=data_dict).text
+    return requests.post(url, data=data_dict, timeout=10).text
 
 
 def xianguo_spider(q, coll_name='tech', max_news_num=1000):
@@ -37,7 +37,11 @@ def xianguo_spider(q, coll_name='tech', max_news_num=1000):
     while True:
         while not q.empty():
             url, data_dict = q.get()
-            html = fetch(url, data_dict)
+            try:
+                html = fetch(url, data_dict)
+            except Exception as e:
+                print(e)
+                continue
 
             if not html or html == 'null':    # xianguo may returns null
                 return
@@ -138,6 +142,17 @@ i黑马 1236199
 tech2ipo创见 1059587"""
 
 
+PSY_ID = """心理FM 1886865
+心理学网 1962382
+壹心理 1281018
+心理月刊 1146737
+社交礼仪心理学 1888854
+职场实用心理学 1962383
+科学松鼠会-心理 1760689
+小黄鸡星座爱情心理学测试 1888851
+心理学空间 1763897"""
+
+
 def get_sectionid_list(title_section_str):
     name_list = (title_section_str.split('\n'))
     res = []
@@ -158,7 +173,7 @@ def run_spider(title_section_str, coll_name):
 
 
 def main():
-    for s in ['PROGRAM', 'FUNNY', 'TECH']:
+    for s in ['PROGRAM', 'FUNNY', 'TECH', 'PSY']:
         title_section_str = globals().get(s+'_ID')
         coll_name = s.lower()
         run_spider(title_section_str, coll_name)
