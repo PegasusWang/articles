@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import _env
+from . import _env
 from config.config import CONFIG
 from pymongo import MongoClient
 from motor import MotorClient

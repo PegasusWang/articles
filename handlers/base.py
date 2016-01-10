@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-import _env
+from . import _env
 from tornado.web import RequestHandler, HTTPError
 import mako.lookup
 import mako.template

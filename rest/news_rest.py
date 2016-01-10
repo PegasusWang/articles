@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import _env
+from . import _env
 import traceback
-from rest_handler import RestHandler
+from .rest_handler import RestHandler
 from tornado import gen
 from tornado.web import url
 

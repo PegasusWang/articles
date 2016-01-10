@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import _env
+from . import _env
 import leancloud
 import _leancloud_init
 from base import BaseHandler
