@@ -17,7 +17,3 @@ class Post(Document):
     status_id = IntField(required=True)    # 0:deleted    1:published  2:draft
     author_id = IntField(required=True)
     tags = ListField(StringField())   # Tag list
-
-
-if __name__ == '__main__':
-    main()

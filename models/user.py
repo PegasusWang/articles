@@ -11,6 +11,7 @@ class User(Document):
     slug = StringField(required=True)    # slug in url
     email = EmailField(required=True)
     created_at = DateTimeField(auto_now_on_insert=True)
+    session = StringField(required=True)
 
 
 if __name__ == '__main__':
