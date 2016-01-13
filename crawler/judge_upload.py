@@ -44,4 +44,4 @@ def exist_or_insert(title):
 
 
 if __name__ == '__main__':
-    print DB
+    print(DB)
