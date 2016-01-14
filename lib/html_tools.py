@@ -2,6 +2,13 @@
 # -*- coding:utf-8 -*-
 
 import html2text
+from markdown2 import markdown
+
+
+def markdown2html(md):
+    """对于代码块\n\n```\n\n + codeblock + \n\n```\n\n"""
+    return markdown(md, extras=["code-friendly", 'fenced-code-blocks'])
+
 
 def html2markdown(html):
     """html is unicode"""

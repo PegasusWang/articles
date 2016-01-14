@@ -1,0 +1,26 @@
+<%inherit file="default.html"/>
+
+<%block name="tpl_post">
+    <div class="inner cover post post-head">
+        <h1 class="cover-heading post-title">${post.title}</h1>
+    </div>
+
+    <div class="inner cover post post-body">
+        <div id="zth_content">
+            ${post.markdown}
+        </div>
+    </div>
+
+    <div class="inner cover container post post-foot footer-info text-muted">
+        <div class="post-foot-left">
+            <a href="/author/jishushare/">${user.name}</a>
+        </div>
+        <div class="post-foot-right">
+            <time datetime="2016-01-11">11 Jan 2016</time>
+        </div>
+        <div>
+            <!--<code class="tag"><a href="/tag/article/">文章</a></code>-->
+            TAGGED IN <a href="/tag/article/">文章</a>
+        </div>
+    </div>
+</%block>

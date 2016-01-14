@@ -11,13 +11,10 @@ import tornado.gen
 from tornado.options import options, define
 from urls import url_patterns
 from motorengine.connection import connect
+from settings import settings
 
-define("port", default=8888, help="run on the given port", type=int)
+#define("port", default=8888, help="run on the given port", type=int)
 
-
-settings = dict(
-    debug=True,
-)
 
 
 class ArticlesApp(tornado.web.Application):
@@ -27,7 +24,7 @@ class ArticlesApp(tornado.web.Application):
         self._motor = get_db(CONFIG.MONGO.DATABASE, client='motor')
         connect(CONFIG.MONGO.DATABASE, host=CONFIG.MONGO.HOST,
                 port=CONFIG.MONGO.PORT,
-                io_loop=tornado.ioloop.IOLoop.current())
+                io_loop=tornado.ioloop.IOLoop.current())    # motorengine
 
 
 def main():

@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 from handlers import (
-    base,
+    base, post
 )
 from rest import (
     articles_rest, news_rest
@@ -11,6 +11,10 @@ from tornado.web import url
 
 # collect all url routes from rest module
 url_patterns = []
+
+for module in [post]:
+    url_patterns.extend(getattr(module, 'URL_ROUTES'))
+
 for module in [articles_rest, news_rest]:
     url_patterns.extend(getattr(module, 'URL_ROUTES'))
 
