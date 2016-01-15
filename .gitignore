@@ -8,3 +8,6 @@
 *.json
 *settings.py
 _templates/*
+
+node_modules/*
+bower_components/*
