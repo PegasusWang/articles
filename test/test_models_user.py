@@ -2,42 +2,34 @@
 # -*- coding:utf-8 -*-
 
 import _env
+import pytest
+from models.post import Post
 from models.user import User
-from tornado import gen
 from tornado.ioloop import IOLoop
+from tornado.testing import gen_test, AsyncTestCase
 from motorengine.connection import connect
 from config.config import CONFIG
-from uuid import uuid4
-
-
-def gen_session():
-    return str(uuid4())
 
 
 save_user = {
-    'name': 'Pegasus',
-    'slug': 'pegasus',
-    'email': '291374108@qq.com',
-    'session': '6355be28-4a80-4a22-bd03-1550faca5487',
+    'name': '老王',
+    'slug': 'lao-wang',
+    'email': 'test@qq.com',
 }
 
 
-@gen.coroutine
-def test_create():
-    user = yield User.objects.create(**save_user)
-    assert user is not None
+class TestModelUser(AsyncTestCase):
+    def setUp(self):
+        self.io_loop = IOLoop.current()
+        connect(CONFIG.MONGO.DATABASE, host=CONFIG.MONGO.HOST,
+                port=CONFIG.MONGO.PORT,
+                io_loop=self.io_loop)    # connect mongoengine
 
-
-@gen.coroutine
-def test_get():
-    user = yield User.objects.get('5697740b70fd902a76421987')
-    print(user.name)
-    assert user is not None
-
-
-connect(CONFIG.MONGO.DATABASE, host=CONFIG.MONGO.HOST,
-        port=CONFIG.MONGO.PORT,
-        io_loop=IOLoop.current())    # motorengine connect
-
-#IOLoop.current().run_sync(test_create)
-IOLoop.current().run_sync(test_get)
+    @gen_test
+    def test_create(self):
+        user = yield User.objects.create(**save_user)
+        print(user._id)
+        assert user is not None
+        assert user.slug == 'lao-wang'
+        num = yield User.objects.filter(slug='lao-wang').delete()
+        assert num == 1

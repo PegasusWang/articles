@@ -1,14 +1,33 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+"""测试motorengine, 话说这玩意github上star太少了，用的有点忐忑
+基于py.test, https://pytest.org/latest/unittest.html
+这里使用py.test偷懒下，不用assertEqual等方法，pytest里都可以使用assert，
+而且可以单独测试函数，不用都搞一个类，pytest可以直接运行unittest类
+参考：http://xidui.github.io/2015/12/09/%E8%B0%88%E8%B0%88%E9%A1%B9%E7%9B%AE%E9%87%8D%E6%9E%84%E4%B8%8E%E6%B5%8B%E8%AF%95/#comments
+使用py.test -q test_xxx.py运行一个模块的测试
+"""
+
 import _env
+import pytest
+import copy
 from models.post import Post
-from tornado import gen
+from models.user import User
+from tornado.gen import coroutine
 from tornado.ioloop import IOLoop
+from tornado.testing import gen_test, AsyncTestCase
 from motorengine.connection import connect
 from config.config import CONFIG
 
+save_user = {
+    'name': '老王',
+    'slug': 'lao-wang',
+    'email': 'test@qq.com',
+}
+
 save_post = {
+    #'author': User(**save_user),
     'title': 'python如何用协程模拟线程',
     'slug': 'test',
     'markdown': '''
@@ -267,31 +286,76 @@ if __name__ == '__main__':
 
 ####练习
 给读者一个练习，尝试把这个简单的示例改成一个可以重用的类，把发请求，处理页面等拆出来以便子类可以重写这些常见的爬虫操作。还可以使用motor等异步库把得到的结果存储到mongodb数据库里。''' ,
-    'author_id': '5697740b70fd902a76421987',
 }
 
 
-@gen.coroutine
-def test_create():
-    """非幂等，对应http中的post"""
-    post = yield Post.objects.create(**save_post)
-    assert post is not None
+class TestModelPost(AsyncTestCase):
+    """Post测试
+    注意改变数据结构后先删除mongo数据库，否则会有超时
+    """
+
+    def setUp(self):
+        self.io_loop = IOLoop.current()
+        connect(CONFIG.MONGO.DATABASE, host=CONFIG.MONGO.HOST,
+                port=CONFIG.MONGO.PORT,
+                io_loop=self.io_loop)    # connect mongoengine
+
+    @gen_test
+    def test_create(self):
+        """非幂等，对应http中的post"""
+        user = yield User.objects.create(**save_user)
+        save_post['author'] = user
+        post = yield Post.objects.create(**save_post)
+        assert post is not None
+        assert post.slug == 'test'
+
+        post_nums = yield Post.objects.filter(slug='test').delete()
+        user_nums = yield User.objects.filter(slug=save_user['slug']).delete()
+        assert post_nums == 1
+        assert user_nums == 1
+
+    @gen_test
+    def test_save(self):
+        """幂等，对应http中的put"""
+        post = yield Post.objects.create(**save_post)
+        assert post.slug == 'test'
+        post.slug = 'save'
+        post = yield post.save()
+        assert post.slug == 'save'
+        nums = yield Post.objects.filter(slug='save').delete()
+        assert nums == 1
+
+    @gen_test
+    def test_bulk_insert(self):
+        post_list = []
+        n = 10
+        for i in range(n):
+            post = copy.deepcopy(save_post)    # note use deepcopy
+            post['slug'] = post['slug'] + str(i)
+            post_obj = Post(**post)
+            post_list.append(post_obj)
+        yield Post.objects.bulk_insert(post_list)
+        post_obj_list = yield Post.objects.find_all()
+        assert n == len(post_obj_list)
+        nums = yield Post.objects.delete()
+        assert nums == n
 
 
-@gen.coroutine
-def test_save():
-    """幂等，对应http中的put"""
-    posts = yield Post.objects.filter(slug='test').find_all()
-    post = posts[0]
-    post.author_id = '5697740b70fd902a76421987'
-    post.status_id = 1
-    post = yield post.save()
-    assert post.author_id == '5697740b70fd902a76421987'
-    assert post.status_id == 1
+@coroutine
+def create_posts():
+    user = yield User.objects.create(**save_user)
+    post_list = []
+    for i in range(10):
+        post = copy.deepcopy(save_post)    # note use deepcopy
+        post['slug'] = post['slug'] + str(i)
+        post['author'] = user
+        post_obj = Post(**post)
+        post_list.append(post_obj)
+    yield Post.objects.bulk_insert(post_list)
 
 
-connect(CONFIG.MONGO.DATABASE, host=CONFIG.MONGO.HOST,
-        port=CONFIG.MONGO.PORT,
-        io_loop=IOLoop.current())    # motorengine connect
-
-IOLoop.current().run_sync(test_save)
+if __name__ == '__main__':
+    connect(CONFIG.MONGO.DATABASE, host=CONFIG.MONGO.HOST,
+            port=CONFIG.MONGO.PORT,
+            io_loop=IOLoop.current())    # connect mongoengine
+    IOLoop.current().run_sync(create_posts)
