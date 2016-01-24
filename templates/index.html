@@ -1,15 +1,22 @@
-<div class="inner cover post post-head">
-    <h1 class="cover-heading post-title"><a href="/pythonfa-song-you-jian-de-li-zi-/">python发送邮件的例子</a></h1>
-</div>
+<%inherit file="default.html"/>
 
-<div class="inner cover post post-body">
-    python发送邮件的例子，有需要的朋友可以参考下。     代码如下: #!/usr/bin/python   # -*- coding: utf-8 -*- import email   import mimetypes   from email.MIMEMultipart import MIMEMultipart   from email.MIMEText import MIMEText   from email.MIMEImage import MIMEImage   import smtplib   def sendEmail(authInfo, fromAdd, toAdd, subject, plainText, htmlText):           strFrom = fromAdd           strTo = ', '.join(toAdd)         server = authInfo.
-</div>
+<%block name="tpl_post">
 
-<nav class="pagination" role="navigation">
-    <span class="page-number">Page 1 of 9</span>
-    <a class="older-posts" href="/page/2/">Older Posts &rarr;</a>
-</nav>
+    % for post in posts:
+        <div class="inner cover post post-head">
+            <h1 class="cover-heading post-title"><a href="/post/${post.slug}">${post.slug}</a></h1>
+        </div>
 
-<div class="inner cover container post post-foot">
-</div>
+        <div class="inner cover post post-body">
+            ${post.brief}
+        </div>
+
+    % endfor
+    <nav class="pagination" role="navigation">
+        <span class="page-number">Page ${page}</span>
+        <a class="older-posts" href="/page/${next_page}/">Older Posts &rarr;</a>
+    </nav>
+
+    <div class="inner cover container post post-foot">
+    </div>
+</%block>

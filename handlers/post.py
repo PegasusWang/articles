@@ -6,28 +6,24 @@ from tornado.web import HTTPError, url
 from tornado.gen import coroutine
 from models.post import Post
 from models.user import User
-from lib.html_tools import markdown2html
 
 
 class IndexHandler(BaseHandler):
     @coroutine
     def get(self, page=1):
         limit = 10
-        offset = limit * (page-1)
+        offset = limit * (int(page)-1)
         posts = yield Post.objects.skip(offset).limit(limit)\
-                      .order_by('-updated-at').find_all()
-        posts_num = yield Post.objects.count()
-        cur_page_num = 1
-        all_page_num = int(posts_num/limit) + 1
+                          .order_by('updated_at').find_all()
 
         try:
-            for post in posts:
-                post.makrdown = markdown2html(post.markdown)
-                del post.author.password
-            self.render('index.html', posts=posts, cur_page=cur_page_num,
-                        all_page_num=all_page_num)
+            posts = [Post.to_dict(post) for post in posts]
+            self.render('index.html', posts=posts, page=page,
+                        next_page=str(int(page)+1))
         except Exception as e:
             print(e)
+            self.render('index.html', posts=[], page=page,
+                        next_page=str(int(page)+1))
 
 
 class PostHandler(BaseHandler):
@@ -49,6 +45,7 @@ class PostHandler(BaseHandler):
 
 
 URL_ROUTES = [
-    url(r'/page/(\d+)?', IndexHandler),
+    url(r'/', IndexHandler),
+    url(r'/page/(\d+)/', IndexHandler),
     url(r'/post/(.*)', PostHandler),
 ]

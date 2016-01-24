@@ -345,7 +345,8 @@ class TestModelPost(AsyncTestCase):
 def create_posts():
     user = yield User.objects.create(**save_user)
     post_list = []
-    for i in range(10):
+    n = 35
+    for i in range(n):
         post = copy.deepcopy(save_post)    # note use deepcopy
         post['slug'] = post['slug'] + str(i)
         post['author'] = user
