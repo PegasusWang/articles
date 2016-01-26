@@ -17,7 +17,7 @@ class IndexHandler(BaseHandler):
                           .order_by('updated_at').find_all()
 
         try:
-            posts = [Post.to_dict(post) for post in posts]
+            posts = [post.to_dict() for post in posts]
             self.render('index.html', posts=posts, page=page,
                         next_page=str(int(page)+1))
         except Exception as e:
@@ -34,8 +34,8 @@ class PostHandler(BaseHandler):
     def get(self, slug):
         post_list = yield Post.objects.filter(slug=slug).find_all()
         if post_list:
-            post = Post.to_dict(post_list[0])
-            author = User.to_dict(post_list[0].author)
+            post = post_list[0].to_dict()
+            author = post_list[0].author.to_dict()
             self.render('post.html', post=post, author=author)
         else:
             raise HTTPError(404)

@@ -15,6 +15,7 @@ save_user = {
     'name': '老王',
     'slug': 'lao-wang',
     'email': 'test@qq.com',
+    'password_hash': 'testtest',
 }
 
 
@@ -30,6 +31,5 @@ class TestModelUser(AsyncTestCase):
         user = yield User.objects.create(**save_user)
         print(user._id)
         assert user is not None
-        assert user.slug == 'lao-wang'
         num = yield User.objects.filter(slug='lao-wang').delete()
         assert num == 1

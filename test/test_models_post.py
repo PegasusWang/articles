@@ -24,6 +24,7 @@ save_user = {
     'name': '老王',
     'slug': 'lao-wang',
     'email': 'test@qq.com',
+    'password_hash': 'testtest'
 }
 
 save_post = {

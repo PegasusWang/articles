@@ -25,14 +25,13 @@ class Post(Document):
     author = ReferenceField(reference_document_type=User)
     tags = ListField(StringField())   # Tag list
 
-    @staticmethod
-    def to_dict(post):
+    def to_dict(self):
         """convert Post object to ObjectDict"""
-        d = post.to_son()
+        d = self.to_son()
         d['created_at'] = d['created_at'].strftime("%Y-%m-%d")
         d['updated_at'] = d['updated_at'].strftime("%Y-%m-%d")
         d['markdown'] = markdown2html(d['markdown'])
-        if post.brief is None:
+        if self.brief is None:
             md = d['markdown']
             md_len = len(d['markdown'])
             min_len = min(140, md_len)
