@@ -98,3 +98,6 @@ body {
     border-color: #1CA347;
 }
 
+.error {
+    text-align: center;
+}

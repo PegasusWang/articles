@@ -29,4 +29,4 @@ class User(Document):
 
     def check_password(self, to_check_password):
         return self.password_hash == bcrypt.hashpw(utf8(to_check_password),
-                                                   self.password_hash)
+                                                   utf8(self.password_hash))

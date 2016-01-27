@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from . import _env
-import leancloud
-import _leancloud_init
-from base import BaseHandler
-from tornado.web import authenticated
-from leancloud import User
+from .base import BaseHandler
+from models.forms import RegisterForm, LoginForm
+from models.user import User
+from tornado.web import authenticated, url
+from tornado.gen import coroutine
+from slugify import slugify
 
 
 class UserBaseHandler(BaseHandler):
@@ -23,47 +24,57 @@ class UserMainHandler(UserBaseHandler):
 
 class UserRegisterHandler(UserBaseHandler):
     def get(self):
-        self.render('/user/register.html')
+        self.render('/login.html', errors="")
 
+    @coroutine
     def post(self):
-        email = self.get_argument('email')
-        username = self.get_argument('username')
-        password = self.get_argument('password')
-
-        user = User()
-        user.set("email", email)
-        user.set("username", username)
-        user.set("password", password)
-        user.sign_up()
-
-        self.set_secure_cookie("username", username)
-        self.set_secure_cookie("user_id", user.id)
-
+        form = RegisterForm(self.request.arguments)
+        if form.validate():
+            print('validate success')
+            user = yield User.objects.create(name=form.data['username'],
+                                        slug=slugify(form.data['username']),
+                                        email=form.data['email'],
+                                        password_hash=form.data['password'])
+        else:
+            print('register error')
+            self.render('/login.html', errors=form.errors)
+            return
+        self.set_secure_cookie("user_id", str(user._id))
+        #self.redirect(self.get_argument('next', '/'))
         self.redirect('/')
-        # self.redirect(self.get_argument('next', '/'))
 
 
 class UserLoginHandler(UserBaseHandler):
     def get(self):
-        self.render('/user/login.html')
+        self.render('/login.html', errors="")
 
+    @coroutine
     def post(self):
-        username = self.get_argument("username")
-        password = self.get_argument("password")
-        try:
-            user = User()
-            user.login(username, password)
-        except leancloud.errors.LeanCloudError as e:
-            print(e.code, e.error)
+        form = LoginForm(self.request.arguments)
+        if form.validate():
+            email = form.data['email']
+            pwd = form.data['password']
+            user = yield User.objects.filter(email=email).find_all()
+            if not user or (not user[0].check_password(pwd)):
+                self.render('/login.html', errors="Invalid email or password")
+                return
+            if form.data['remeber_me']:
+                self.set_secure_cookie("user_id", str(user[0]._id))
+            self.redirect(self.get_argument('next', '/'))
 
-        self.set_secure_cookie("user_id", user.id)
-        self.set_secure_cookie("username", username)
-        #self.redirect('/')
-        self.redirect('/user/')
+        else:
+            self.render('/login.html', errors="Invalid email or password")
+            return
 
 
 class UserLogoutHandler(UserBaseHandler):
     def get(self):
-        self.clear_cookie("username")
         self.clear_cookie("user_id")
         self.redirect(self.get_argument("next", "/"))
+
+
+URL_ROUTES = [
+    url(r'/login', UserLoginHandler),
+    url(r'/register', UserRegisterHandler),
+    url(r'/logout', UserLogoutHandler),
+]
